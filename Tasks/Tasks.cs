@@ -2,8 +2,19 @@
 using System.Linq;
 using System.Collections.Generic;
 
-namespace Tasks
+namespace DailyTaskReminder.Tasks
 {
+    public static class Testing
+    {
+        public static List<Task> MockTasks()
+        {
+            List<Task> tasks = new List<Task>();
+
+            tasks.Add(new DailyTask() { Name = "Daily16", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(16) });
+            return tasks;
+        }
+    }
+
     public static class DateTimeExtensions
     {
         public static int HowManyDaysUntilThisDayOfWeek(this DateTime d, DayOfWeek day)
@@ -37,24 +48,47 @@ namespace Tasks
     public abstract class Task
     {
         public string Name { get; set; }
-        public bool IsFinished { get; set; }
+        protected bool isFinished;
+        public bool IsFinished { 
+            get => isFinished;
+            set
+            {
+                isRemindCacheValid = false;
+                isFinished = value;
+            }
+        }
         public TimeSpan RemindSpan { get; set; }
+        public DateTime GetRemindTime
+        {
+            get
+            {
+                if (isRemindCacheValid) return remindTime;
+                else
+                {
+                    remindTime = GetNextRemindTime();
+                    isRemindCacheValid = true;
+                    return remindTime;
+                }
+            }
+        }
+        private bool isRemindCacheValid = false;
+        private DateTime remindTime;
 
-        public abstract DateTime GetNextRemindTime();
+        protected abstract DateTime GetNextRemindTime();
 
     }
 
     public abstract class SimpleTask : Task
     {   
-        protected DateTime dueTime { get; set; }
+        public DateTime DueTime { get; set; }
     }
 
     public class DailyTask : SimpleTask
     {
-        public override DateTime GetNextRemindTime()
+        protected override DateTime GetNextRemindTime()
         {
             DateTime now = DateTime.Now;
-            DateTime deadline = new DateTime(now.Year, now.Month, now.Day, dueTime.Hour, dueTime.Minute, dueTime.Second);
+            DateTime deadline = new DateTime(now.Year, now.Month, now.Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
 
             if (deadline < now || IsFinished) deadline = deadline.AddDays(1);
             DateTime remindTime = deadline - RemindSpan;
@@ -67,10 +101,10 @@ namespace Tasks
     {
         DayOfWeek[] days { get; set; }
 
-        public override DateTime GetNextRemindTime()
+        protected override DateTime GetNextRemindTime()
         {
             DateTime now = DateTime.Now;
-            DateTime deadline = new DateTime(now.Year, now.Month, now.Day, dueTime.Hour, dueTime.Minute, dueTime.Second);
+            DateTime deadline = new DateTime(now.Year, now.Month, now.Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
 
             // Order days by which one comes the soonest
             List<DayOfWeek> ordered = days.OrderBy(day => now.HowManyDaysUntilThisDayOfWeek(day)).ToList();
@@ -90,10 +124,10 @@ namespace Tasks
     {
         int[] days { get; set; }
 
-        public override DateTime GetNextRemindTime()
+        protected override DateTime GetNextRemindTime()
         {
             DateTime now = DateTime.Now;
-            DateTime deadline = new DateTime(now.Year, now.Month, now.Day, dueTime.Hour, dueTime.Minute, dueTime.Second);
+            DateTime deadline = new DateTime(now.Year, now.Month, now.Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
 
             List<int> ordered = days.OrderBy(day => now.HowManyDaysUntilThisDayOfMonth(day)).ToList();
 
@@ -113,10 +147,10 @@ namespace Tasks
         int month { get; set; }
         int day { get; set; }
 
-        public override DateTime GetNextRemindTime()
+        protected override DateTime GetNextRemindTime()
         {
             DateTime now = DateTime.Now;
-            DateTime deadline = new DateTime(now.Year, month, day, dueTime.Hour, dueTime.Minute, dueTime.Second);
+            DateTime deadline = new DateTime(now.Year, month, day, DueTime.Hour, DueTime.Minute, DueTime.Second);
 
             if (deadline < now || IsFinished)
             {
@@ -131,7 +165,7 @@ namespace Tasks
     public class CustomTask : Task
     {
         //TODO
-        public override DateTime GetNextRemindTime()
+        protected override DateTime GetNextRemindTime()
         {
             throw new NotImplementedException();
         }
