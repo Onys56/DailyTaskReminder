@@ -11,6 +11,9 @@ namespace DailyTaskReminder.Tasks
             List<Task> tasks = new List<Task>();
 
             tasks.Add(new DailyTask() { Name = "Daily16", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(16) });
+            tasks.Add(new DailyTask() { Name = "Daily18", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(19).AddMinutes(52) });
+            tasks.Add(new MonthlyTask() { Name = "Monthly19", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(19).AddMinutes(52), days = new int[] { 19} });
+            tasks.Add(new MonthlyTask() { Name = "Monthly1920", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(19).AddMinutes(52), days = new int[] { 19, 20 } });
             return tasks;
         }
     }
@@ -27,17 +30,24 @@ namespace DailyTaskReminder.Tasks
         public static int HowManyDaysUntilThisDayOfMonth(this DateTime d, int day)
         {
             if (day < 1 || day > 31) throw new ArgumentException("Wrong day number", nameof(day));
+            if (d.Day == day) return 0;
 
             int diff = 0;
 
             // Skip and count days of months that have less days then we need
             int skipped = 0;
             int daysInThisMonth = DateTime.DaysInMonth(d.Year, d.Month);
-            while (daysInThisMonth > day)
+            if (day < d.Day)
             {
                 diff += daysInThisMonth;
                 skipped++;
-                daysInThisMonth = DateTime.DaysInMonth(d.Year + (d.Month + skipped) / 12, d.Month + skipped % 12);
+                daysInThisMonth = DateTime.DaysInMonth(d.Year + (d.Month - 1 + skipped) / 12, (d.Month - 1 + skipped) % 12 + 1);
+            }
+            while (day > daysInThisMonth)
+            {
+                diff += daysInThisMonth;
+                skipped++;
+                daysInThisMonth = DateTime.DaysInMonth(d.Year + (d.Month - 1 + skipped) / 12, (d.Month - 1 + skipped) % 12 + 1);
             }
 
             diff += day - d.Day;
@@ -48,33 +58,14 @@ namespace DailyTaskReminder.Tasks
     public abstract class Task
     {
         public string Name { get; set; }
-        protected bool isFinished;
-        public bool IsFinished { 
-            get => isFinished;
-            set
-            {
-                isRemindCacheValid = false;
-                isFinished = value;
-            }
-        }
+        public bool IsFinished { get; set; }
+        public bool ReminderSent { get; set; }
         public TimeSpan RemindSpan { get; set; }
-        public DateTime GetRemindTime
-        {
-            get
-            {
-                if (isRemindCacheValid) return remindTime;
-                else
-                {
-                    remindTime = GetNextRemindTime();
-                    isRemindCacheValid = true;
-                    return remindTime;
-                }
-            }
-        }
-        private bool isRemindCacheValid = false;
-        private DateTime remindTime;
+        public DateTime GetRemindTime => (IsFinished || ReminderSent ? GetDeadline(true) : GetDeadline()) - RemindSpan;
 
-        protected abstract DateTime GetNextRemindTime();
+        public DateTime GetDeadlineTime => GetDeadline();
+
+        protected abstract DateTime GetDeadline(bool next = false);
 
     }
 
@@ -85,23 +76,25 @@ namespace DailyTaskReminder.Tasks
 
     public class DailyTask : SimpleTask
     {
-        protected override DateTime GetNextRemindTime()
+        protected override DateTime GetDeadline(bool next = false)
         {
             DateTime now = DateTime.Now;
             DateTime deadline = new DateTime(now.Year, now.Month, now.Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
 
-            if (deadline < now || IsFinished) deadline = deadline.AddDays(1);
-            DateTime remindTime = deadline - RemindSpan;
+            int i = 0;
+            if (deadline < now) i++;
+            if (next) i++;
+            if (i > 0) deadline = deadline.AddDays(i);
 
-            return remindTime;
+            return deadline;
         }
     }
 
     public class WeeklyTask : SimpleTask
     {
-        DayOfWeek[] days { get; set; }
+        public DayOfWeek[] days { get; internal set; }
 
-        protected override DateTime GetNextRemindTime()
+        protected override DateTime GetDeadline(bool next = false)
         {
             DateTime now = DateTime.Now;
             DateTime deadline = new DateTime(now.Year, now.Month, now.Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
@@ -109,55 +102,66 @@ namespace DailyTaskReminder.Tasks
             // Order days by which one comes the soonest
             List<DayOfWeek> ordered = days.OrderBy(day => now.HowManyDaysUntilThisDayOfWeek(day)).ToList();
 
-            if (deadline < now || IsFinished)
+            int i = 0;
+            if (deadline < now) i++;
+            if (next) i++;
+            if (i > 0)
             {
-                DayOfWeek nextDay = ordered[1 % ordered.Count];
-                deadline = deadline.AddDays(now.HowManyDaysUntilThisDayOfWeek(nextDay));
+                DayOfWeek nextDay = ordered[i % ordered.Count];
+                deadline = deadline.AddDays(now.HowManyDaysUntilThisDayOfWeek(nextDay) + 7 * (i % ordered.Count));
             }
-            DateTime remindTime = deadline - RemindSpan;
 
-            return remindTime;
+            return deadline;
         }
     }
 
     public class MonthlyTask : SimpleTask
     {
-        int[] days { get; set; }
+        public int[] days { get; internal set; }
 
-        protected override DateTime GetNextRemindTime()
+        protected override DateTime GetDeadline(bool next = false)
         {
             DateTime now = DateTime.Now;
             DateTime deadline = new DateTime(now.Year, now.Month, now.Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
 
             List<int> ordered = days.OrderBy(day => now.HowManyDaysUntilThisDayOfMonth(day)).ToList();
+            deadline = deadline.AddDays(now.HowManyDaysUntilThisDayOfMonth(ordered[0]));
 
-            if (deadline < now || IsFinished)
+            int i = 0;
+            if (deadline < now) i++;
+            if (next) i++;
+            while (i > 0)
             {
+                ordered = days.OrderBy(day => deadline.HowManyDaysUntilThisDayOfMonth(day)).ToList();
                 int nextDay = ordered[1 % ordered.Count];
-                deadline = deadline.AddDays(now.HowManyDaysUntilThisDayOfMonth(nextDay));
+                deadline = deadline.AddDays(1);
+                deadline = deadline.AddDays(deadline.HowManyDaysUntilThisDayOfMonth(nextDay));
+                i--;
             }
-            DateTime remindTime = deadline - RemindSpan;
 
-            return remindTime;
+            return deadline;
         }
     }
 
     public class YearlyTask : SimpleTask
     {
-        int month { get; set; }
-        int day { get; set; }
+        public int month { get; internal set; }
+        public int day { get; internal set; }
 
-        protected override DateTime GetNextRemindTime()
+        protected override DateTime GetDeadline(bool next = false)
         {
             DateTime now = DateTime.Now;
             DateTime deadline = new DateTime(now.Year, month, day, DueTime.Hour, DueTime.Minute, DueTime.Second);
 
-            if (deadline < now || IsFinished)
+            int i = 0;
+            if (deadline < now) i++;
+            if (next) i++;
+            if (i > 0)
             {
-                deadline = deadline.AddYears(1);
+                deadline = deadline.AddYears(i);
             }
 
-            return deadline - RemindSpan;
+            return deadline;
         }
     }
 
@@ -165,7 +169,7 @@ namespace DailyTaskReminder.Tasks
     public class CustomTask : Task
     {
         //TODO
-        protected override DateTime GetNextRemindTime()
+        protected override DateTime GetDeadline(bool next = false)
         {
             throw new NotImplementedException();
         }
