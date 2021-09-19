@@ -1,0 +1,78 @@
+﻿<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Daily Task Reminder</title>
+    <meta name="description" content="Web Client for DailyTaskReminder.">
+    <meta name="author" content="Ondřej Procházka">
+    <style>
+        table {
+            border: 5px solid black;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        th {
+            border: 2px solid black;
+        }
+        td {
+            border: 1px solid gray;
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+    
+<body>
+    <h1>Daily task reminder</h1>
+    <table>
+        <thead id="content">
+            <tr><th>Name</th><th>Deadline</th><th>Status</th><th>Finish</th></tr>
+        </thead>
+    </table>
+    <script>
+        const URL = "http://localhost:25566";
+
+        fetch(URL, { method: "GET" }).then(r => r.json()).then(r => r.sort((a, b) =>
+            Date.parse(a.GetDeadlineTime) - Date.parse(b.GetDeadlineTime)
+        ).forEach(
+            task => addRow(task.Name, task.GetDeadlineTime, task.IsFinished)
+        ));
+
+        var table = document.getElementById("content");
+        function addRow(name, deadline, finished) {
+            let row = document.createElement("tr");
+            let nameNode = document.createElement("td");
+            let deadlineNode = document.createElement("td");
+            let finishedNode = document.createElement("td");
+            let finishNode = document.createElement("td");
+
+            nameNode.innerText = name;
+            let date = new Date(deadline + "+00:00");
+            deadlineNode.innerText = date.toLocaleString("cs-CZ");
+            finishedNode.innerText = finished ? "Finished" : "Not finished";
+
+            if (finished === false) {
+                let button = document.createElement("button");
+                button.innerText = "Finish";
+                button.addEventListener("click", () => {
+                    finishedNode.innerText = "Finished";
+                    fetch(URL + "?name=" + name, { method: "POST" }).then(() => { console.log("finish of " + name + " successful"); button.style.display = "none"; });
+                });
+                finishNode.appendChild(button);
+            }
+
+            row.appendChild(nameNode);
+            row.appendChild(deadlineNode);
+            row.appendChild(finishedNode);
+            row.appendChild(finishNode);
+
+            table.appendChild(row);
+
+        }
+    </script>
+</body>
+</html>
