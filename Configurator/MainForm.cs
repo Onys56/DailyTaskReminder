@@ -13,13 +13,33 @@ namespace Configurator
 {
     public partial class MainForm : Form
     {
+        /// <summary>
+        /// List of loaded tasks
+        /// </summary>
         public List<Task> Tasks;
+
+        /// <summary>
+        /// Path to config file where Tasks will be stored
+        /// </summary>
         private string filePath;
 
+        // Groups of UI controls for easier hiding and showing
+        /// <summary>
+        /// Controls in the main menu
+        /// </summary>
         private Control[] menuControls;
+        /// <summary>
+        /// Controls in the config screen
+        /// </summary>
         private Control[] configControls;
+        /// <summary>
+        /// Controls only shown for some types of Tasks
+        /// </summary>
         private Control[] specialConfig;
 
+        /// <summary>
+        /// The task that is currently selected in the <c cref="TaskList">list of tasks</c>
+        /// </summary>
         private Task selectedTask;
 
         public MainForm()
@@ -74,6 +94,9 @@ namespace Configurator
             }
         }
 
+        /// <summary>
+        /// Wrapper for tasks with overriden ToString method
+        /// </summary>
         class TaskListItem
         {
             public Task task;
@@ -88,6 +111,9 @@ namespace Configurator
             }
         }
 
+        /// <summary>
+        /// Loads the tasks from selected file
+        /// </summary>
         private void button_existing_file_Click(object sender, EventArgs e)
         {
             DialogResult result = openFileDialog1.ShowDialog();
@@ -99,6 +125,9 @@ namespace Configurator
             }
         }
 
+        /// <summary>
+        /// Lets the user specify where the config file should be saved
+        /// </summary>
         private void button_new_file_Click(object sender, EventArgs e)
         {
             DialogResult result = saveFileDialog1.ShowDialog();
@@ -110,6 +139,11 @@ namespace Configurator
             }
         }
 
+        /// <summary>
+        /// Change to the configuration "scene".
+        /// Hides all the menu controls and shows the common configuration controls.
+        /// The special configuration controls remain hidden as they should be visible only for some tasks.
+        /// </summary>
         private void ChangeToConfig()
         {
             foreach (var c in menuControls)
@@ -131,6 +165,9 @@ namespace Configurator
             }
         }
 
+        /// <summary>
+        /// Chacnge back to main memu.
+        /// </summary>
         private void ChangeToMenu()
         {
             foreach (var c in configControls)
@@ -149,6 +186,10 @@ namespace Configurator
             }
         }
 
+        /// <summary>
+        /// When user selects different task in the <c cref="TaskList">list of tasks</c> this method
+        /// changes the <c cref="selectedTask">selected task field</c>.
+        /// </summary>
         private void TaskList_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (TaskList.SelectedItem is null) return;
@@ -156,6 +197,9 @@ namespace Configurator
             RefreshTaskDisplay();
         }
 
+        /// <summary>
+        /// Fills in the properties of selected task to the UI controls where the user can see and change them.
+        /// </summary>
         private void RefreshTaskDisplay()
         {
             taskName_textBox.Text = selectedTask.Name;
@@ -216,22 +260,31 @@ namespace Configurator
             }
         }
 
+        /// <summary>
+        /// Back to menu button with confirmation.
+        /// </summary>
         private void button_back_to_menu_Click(object sender, EventArgs e)
         {
             var confirmResult = MessageBox.Show("Are you sure you want to go back? Any unsaved changes will be lost.", "Confirm", MessageBoxButtons.YesNo);
             if (confirmResult == DialogResult.Yes) ChangeToMenu();
         }
 
+        /// <summary>
+        /// Add reminder to a task.
+        /// </summary>
         private void remindersAdd_button_Click(object sender, EventArgs e)
         {
             if (TaskList.SelectedItem == null) return;
-            string name = Interaction.InputBox("Name of the reminder:", "Add reminder");
+            string name = Interaction.InputBox("Name of the reminder:\n(Use the same name that is defined in the reminders config file)", "Add reminder");
             if (string.IsNullOrWhiteSpace(name)) return;
 
             selectedTask.Reminders.Add(name);
             RefreshTaskDisplay();
         }
 
+        /// <summary>
+        /// Remove reminder from a task.
+        /// </summary>
         private void remindersDelete_button_Click(object sender, EventArgs e)
         {
             string selected = (string)reminders_listBox.SelectedItem;
@@ -241,11 +294,17 @@ namespace Configurator
             RefreshTaskDisplay();
         }
 
+        /// <summary>
+        /// Display error to user.
+        /// </summary>
         private void ShowError(string message)
         {
             MessageBox.Show(message, "Error");
         }
 
+        /// <summary>
+        /// Handles the change in day number text box.
+        /// </summary>
         private void day_number_ValueChanged(object sender, EventArgs e)
         {
             if(selectedTask.GetType().Name == "MonthlyTask")
@@ -258,12 +317,22 @@ namespace Configurator
             }
         }
 
+        /// <summary>
+        /// Handles the change in month number text box.
+        /// </summary>
         private void month_number_ValueChanged(object sender, EventArgs e)
         {
             ((YearlyTask)selectedTask).Month = (int)month_number.Value;
         }
-
+        /// <summary>
+        /// Ignore the <c cref="weekDays_checkBox_ItemCheck(object, ItemCheckEventArgs)">checkBox checked event</c>.
+        /// Useful when changing the check status in code so that the event does not get triggered.
+        /// </summary>
         private bool ignoreCheck;
+
+        /// <summary>
+        /// Handles cheking and unchecking of checkBox list items.
+        /// </summary>
         private void weekDays_checkBox_ItemCheck(object sender, ItemCheckEventArgs e)
         {
             if (ignoreCheck) return;
@@ -276,6 +345,9 @@ namespace Configurator
                 if (days.Contains(day)) days.Remove((DayOfWeek)((1 + e.Index) % 7));
         }
 
+        /// <summary>
+        /// Changes the <c cref="Task.RemindSpan">time before reminder</c> of selected task.
+        /// </summary>
         private void dateTimePicker2_ValueChanged(object sender, EventArgs e)
         {
             if (selectedTask is null) return;
@@ -283,12 +355,18 @@ namespace Configurator
             selectedTask.RemindSpan = new TimeSpan(d.Hour, d.Minute, d.Second);
         }
 
+        /// <summary>
+        /// Changes the <c cref="SimpleTask.DueTime">deadline time</c> of selected task.
+        /// </summary>
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
         {
             if (selectedTask is null) return;
             ((SimpleTask)selectedTask).DueTime = dateTimePicker1.Value;
         }
 
+        /// <summary>
+        /// Changes the name of the task.
+        /// </summary>
         private void taskName_textBox_TextChanged(object sender, EventArgs e)
         {
             if (selectedTask is null) return;
@@ -301,21 +379,34 @@ namespace Configurator
             else
             {
                 selectedTask.Name = newName;
+                int i = TaskList.SelectedIndex;
+                TaskList.Items[i] = TaskList.Items[i];
             }
         }
 
+        /// <summary>
+        /// Handles the click on Add Task button.
+        /// Shows dialog using the <c cref="NewTaskDialog">dialog form</c>.
+        /// </summary>
         private void addTask_button_Click(object sender, EventArgs e)
         {
             Form dialog = new NewTaskDialog(this);
             dialog.ShowDialog();
         }
 
+        /// <summary>
+        /// Create a now task and add it the the list.
+        /// </summary>
         public void AddTask(Task t)
         {
             Tasks.Add(t);
             TaskList.Items.Add(new TaskListItem(t));
         }
 
+        /// <summary>
+        /// Prevents beep when pressing enter in the <c cref="taskName_textBox">task name textBox</c>
+        /// and instead switches focus to the next user input (the deadline picker).
+        /// </summary>
         private void taskName_textBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
@@ -328,6 +419,10 @@ namespace Configurator
 
         }
 
+        /// <summary>
+        /// Handles the delete task button.
+        /// Asks the user for conformation.
+        /// </summary>
         private void deleteTask_Button_Click(object sender, EventArgs e)
         {
             if (TaskList.SelectedItem is null) return;
@@ -340,6 +435,9 @@ namespace Configurator
             }
         }
 
+        /// <summary>
+        /// Saves the tasks to the <c cref="filePath">pre-specified file</c>.
+        /// </summary>
         private void saveToFile_button_Click(object sender, EventArgs e)
         {
             Serialization.Serialize(Tasks, filePath);

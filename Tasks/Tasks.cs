@@ -242,24 +242,4 @@ namespace DailyTaskReminder.Tasks
             return this;
         }
     }
-
-
-    public class CustomTask : Task
-    {
-        //TODO
-        protected override DateTimeOffset GetDeadline(bool next = false)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Serialize(StreamWriter sw)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override Task Deserialize(StreamReader sr)
-        {
-            throw new NotImplementedException();
-        }
-    }
 }

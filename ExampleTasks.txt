@@ -1,0 +1,19 @@
+DailyTask
+Feed The Dog
+01.01.1753 18:00:00 +01:00
+01:00:00
+DiscordPrivate
+
+DailyTask
+Take Medication
+01.01.1753 9:00:00 +01:00
+00:05:00
+-
+
+WeeklyTask
+Friday
+Water the plants
+01.01.1753 18:00:00 +01:00
+01:00:00
+DiscordPrivate;TelegramDM
+
