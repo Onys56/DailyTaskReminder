@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using DailyTaskReminder.Reminders;
 
 namespace DailyTaskReminder.Tasks
 {
@@ -10,24 +11,25 @@ namespace DailyTaskReminder.Tasks
         {
             List<Task> tasks = new List<Task>();
 
-            tasks.Add(new DailyTask() { Name = "Daily16", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(16) });
-            tasks.Add(new DailyTask() { Name = "Daily18", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(19).AddMinutes(52) });
+            tasks.Add(new DailyTask() { Name = "Daily16", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(12) });
+            tasks.Add(new DailyTask() { Name = "Daily18", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(21).AddMinutes(32) });
+            tasks.Add(new WeeklyTask() { Name = "WeeklyMo", IsFinished = false, RemindSpan = new TimeSpan(2, 0, 0), DueTime = DateTime.Today.AddHours(3), days = new DayOfWeek[] { DayOfWeek.Monday, DayOfWeek.Tuesday} });
             tasks.Add(new MonthlyTask() { Name = "Monthly19", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(19).AddMinutes(52), days = new int[] { 19} });
             tasks.Add(new MonthlyTask() { Name = "Monthly1920", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(19).AddMinutes(52), days = new int[] { 19, 20 } });
             return tasks;
         }
     }
 
-    public static class DateTimeExtensions
+    public static class DateTimeOffsetExtensions
     {
-        public static int HowManyDaysUntilThisDayOfWeek(this DateTime d, DayOfWeek day)
+        public static int HowManyDaysUntilThisDayOfWeek(this DateTimeOffset d, DayOfWeek day)
         {
             int diff = day - d.DayOfWeek;
             if (diff < 0) diff += 7;
             return diff;
         }
 
-        public static int HowManyDaysUntilThisDayOfMonth(this DateTime d, int day)
+        public static int HowManyDaysUntilThisDayOfMonth(this DateTimeOffset d, int day)
         {
             if (day < 1 || day > 31) throw new ArgumentException("Wrong day number", nameof(day));
             if (d.Day == day) return 0;
@@ -40,14 +42,13 @@ namespace DailyTaskReminder.Tasks
             if (day < d.Day)
             {
                 diff += daysInThisMonth;
-                skipped++;
-                daysInThisMonth = DateTime.DaysInMonth(d.Year + (d.Month - 1 + skipped) / 12, (d.Month - 1 + skipped) % 12 + 1);
+                skipped++;                
             }
             while (day > daysInThisMonth)
             {
+                daysInThisMonth = DateTime.DaysInMonth(d.Year + (d.Month - 1 + skipped) / 12, (d.Month - 1 + skipped) % 12 + 1);
                 diff += daysInThisMonth;
                 skipped++;
-                daysInThisMonth = DateTime.DaysInMonth(d.Year + (d.Month - 1 + skipped) / 12, (d.Month - 1 + skipped) % 12 + 1);
             }
 
             diff += day - d.Day;
@@ -58,28 +59,29 @@ namespace DailyTaskReminder.Tasks
     public abstract class Task
     {
         public string Name { get; set; }
+        public List<IReminder> Reminders { get; set; } = new List<IReminder>();
         public bool IsFinished { get; set; }
         public bool ReminderSent { get; set; }
         public TimeSpan RemindSpan { get; set; }
-        public DateTime GetRemindTime => (IsFinished || ReminderSent ? GetDeadline(true) : GetDeadline()) - RemindSpan;
+        public DateTimeOffset GetRemindTime => (IsFinished || ReminderSent ? GetDeadline(true) : GetDeadline()) - RemindSpan;
 
-        public DateTime GetDeadlineTime => GetDeadline();
+        public DateTimeOffset GetDeadlineTime => GetDeadline();
 
-        protected abstract DateTime GetDeadline(bool next = false);
+        protected abstract DateTimeOffset GetDeadline(bool next = false);
 
     }
 
     public abstract class SimpleTask : Task
     {   
-        public DateTime DueTime { get; set; }
+        public DateTimeOffset DueTime { get; set; }
     }
 
     public class DailyTask : SimpleTask
     {
-        protected override DateTime GetDeadline(bool next = false)
+        protected override DateTimeOffset GetDeadline(bool next = false)
         {
-            DateTime now = DateTime.Now;
-            DateTime deadline = new DateTime(now.Year, now.Month, now.Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
+            DateTimeOffset now = DateTimeOffset.Now;
+            DateTimeOffset deadline = new DateTime(now.Year, now.Month, now.Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
 
             int i = 0;
             if (deadline < now) i++;
@@ -94,10 +96,10 @@ namespace DailyTaskReminder.Tasks
     {
         public DayOfWeek[] days { get; internal set; }
 
-        protected override DateTime GetDeadline(bool next = false)
+        protected override DateTimeOffset GetDeadline(bool next = false)
         {
-            DateTime now = DateTime.Now;
-            DateTime deadline = new DateTime(now.Year, now.Month, now.Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
+            DateTimeOffset now = DateTimeOffset.Now;
+            DateTimeOffset deadline = new DateTime(now.Year, now.Month, now.Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
 
             // Order days by which one comes the soonest
             List<DayOfWeek> ordered = days.OrderBy(day => now.HowManyDaysUntilThisDayOfWeek(day)).ToList();
@@ -119,10 +121,10 @@ namespace DailyTaskReminder.Tasks
     {
         public int[] days { get; internal set; }
 
-        protected override DateTime GetDeadline(bool next = false)
+        protected override DateTimeOffset GetDeadline(bool next = false)
         {
-            DateTime now = DateTime.Now;
-            DateTime deadline = new DateTime(now.Year, now.Month, now.Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
+            DateTimeOffset now = DateTimeOffset.Now;
+            DateTimeOffset deadline = new DateTime(now.Year, now.Month, now.Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
 
             List<int> ordered = days.OrderBy(day => now.HowManyDaysUntilThisDayOfMonth(day)).ToList();
             deadline = deadline.AddDays(now.HowManyDaysUntilThisDayOfMonth(ordered[0]));
@@ -148,10 +150,10 @@ namespace DailyTaskReminder.Tasks
         public int month { get; internal set; }
         public int day { get; internal set; }
 
-        protected override DateTime GetDeadline(bool next = false)
+        protected override DateTimeOffset GetDeadline(bool next = false)
         {
-            DateTime now = DateTime.Now;
-            DateTime deadline = new DateTime(now.Year, month, day, DueTime.Hour, DueTime.Minute, DueTime.Second);
+            DateTimeOffset now = DateTimeOffset.Now;
+            DateTimeOffset deadline = new DateTime(now.Year, month, day, DueTime.Hour, DueTime.Minute, DueTime.Second);
 
             int i = 0;
             if (deadline < now) i++;
@@ -169,7 +171,7 @@ namespace DailyTaskReminder.Tasks
     public class CustomTask : Task
     {
         //TODO
-        protected override DateTime GetDeadline(bool next = false)
+        protected override DateTimeOffset GetDeadline(bool next = false)
         {
             throw new NotImplementedException();
         }

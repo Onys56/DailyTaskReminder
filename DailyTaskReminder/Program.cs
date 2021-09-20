@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
-using System.Net;
+using System.Net.Http;
+
 using DailyTaskReminder.Tasks;
+using DailyTaskReminder.Reminders;
 
 namespace DailyTaskReminder
 {
@@ -15,8 +15,11 @@ namespace DailyTaskReminder
         static System.Timers.Timer deadlineTimer;
         static List<Task> tasks = Testing.MockTasks();
 
+        static HttpClient client = new();
+
         static void Main(string[] args) 
         {
+            Instances.LoadReminders("ApiKeys.json");
             Server s = new Server(tasks);
             Thread serverThread = new Thread(s.Start);
             serverThread.Start();
@@ -42,12 +45,12 @@ namespace DailyTaskReminder
             UpdateTimer(deadlineTimer, soonest.GetDeadlineTime, soonest, HandleDeadline);
         }
 
-        static void UpdateTimer(System.Timers.Timer timer, DateTime time, Task task, Action<Task> handler)
+        static void UpdateTimer(System.Timers.Timer timer, DateTimeOffset time, Task task, Action<Task> handler)
         {
-            if (task.GetRemindTime < DateTime.Now) handler(task);
+            if (task.GetRemindTime < DateTimeOffset.Now) handler(task);
             else
             {
-                timer = new() { AutoReset = false, Interval =  (time - DateTime.Now).TotalMilliseconds };
+                timer = new() { AutoReset = false, Interval =  (time - DateTimeOffset.Now).TotalMilliseconds };
                 timer.Elapsed += (object source, System.Timers.ElapsedEventArgs e) => handler(task);
                 timer.Start();
             }
@@ -57,9 +60,14 @@ namespace DailyTaskReminder
         {
             if (!t.IsFinished && !t.ReminderSent)
             {
+                string message = $"Task {t.Name} should be finished in {t.GetDeadlineTime}";
+                Console.WriteLine(message);
                 t.ReminderSent = true;
-                Console.WriteLine($"{DateTime.Now} Sending reminder for {t.Name}...");
-                // TODO: Send reminders
+                Console.WriteLine($"{DateTimeOffset.Now} Sending reminder for {t.Name}...");
+                foreach (IReminder reminder in t.Reminders)
+                {
+                    reminder.Send(client, message);
+                }
             }
 
             EnqueueSoonestReminder();
@@ -70,79 +78,6 @@ namespace DailyTaskReminder
             t.IsFinished = false;
             t.ReminderSent = false;
             EnqueueSoonestDeadline();
-        }
-    }
-
-    class Server
-    {
-        private HttpListener listener;
-        private List<Task> tasks;
-
-        public Server(List<Task> tasks, int port = 25566)
-        {
-            this.tasks = tasks;
-            this.listener = new HttpListener();
-            listener.Prefixes.Add($"http://+:{port}/");
-        }
-
-        public void Start()
-        {
-            listener.Start();
-            Console.WriteLine("Listening...");
-            while (true)
-            {
-                HttpListenerContext context = listener.GetContext();
-                string method = context.Request.HttpMethod.ToUpper();
-                switch (method)
-                {
-                    case "GET": 
-                        HandleGet(context);
-                        break;
-                    case "POST":
-                        HandlePost(context);
-                        break;
-                    default:
-                        BadRequest(context, $"HttpMethod {method} is not supported.");
-                        break;
-                }
-            }
-        }
-
-        private void HandleGet(HttpListenerContext context)
-        {
-            HttpListenerResponse response = context.Response;
-            byte[] res = JsonSerializer.SerializeToUtf8Bytes(tasks);
-            response.ContentType = "application/json";
-            response.ContentLength64 = res.Length;
-            response.OutputStream.Write(res, 0, res.Length);
-            response.StatusCode = 200;
-            response.Close();
-        }
-
-        private void HandlePost(HttpListenerContext context)
-        {
-            Task t;
-            if (context.Request.QueryString.Keys.Count == 1 &&
-                context.Request.QueryString.Keys[0] == "name" &&
-                (t = tasks.Find(t => t.Name == context.Request.QueryString["name"])) != null)
-            {
-                HttpListenerResponse response = context.Response;
-                Console.WriteLine($"Setting task {t.Name} as finished...");
-                t.IsFinished = true;
-                response.StatusCode = 200;
-                response.Close();
-            }
-            else
-            {
-                BadRequest(context, "Bad query");
-            }
-        }
-
-        private void BadRequest(HttpListenerContext context, string message)
-        {
-            HttpListenerResponse response = context.Response;
-            response.StatusCode = 400;
-            response.Close();
         }
     }
 }

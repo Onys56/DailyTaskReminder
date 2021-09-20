@@ -51,7 +51,7 @@
             let finishNode = document.createElement("td");
 
             nameNode.innerText = name;
-            let date = new Date(deadline + "+00:00");
+            let date = new Date(deadline);
             deadlineNode.innerText = date.toLocaleString("cs-CZ");
             finishedNode.innerText = finished ? "Finished" : "Not finished";
 

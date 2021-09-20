@@ -1,0 +1,18 @@
+[
+  { // Discord webhook
+    "Type": "DiscordWebhook",
+    "Name": "DiscordPrivate",
+    "URL": "" // Webhook url goes here, for example: https://discord.com/api/webhooks/98798456489/okdsSaSuFZALr6zT7t3djaslkjiI7W4Ac1vGAyO1D459b6lZlUeVS1EcxwHbn5441I8rq
+  },
+  { // Another Discord webhook, but this time to a different channel (with different URL)
+    "Type": "DiscordWebhook",
+    "Name": "DiscordPublic",
+    "URL": "" 
+  },
+  { // Telegram bot that sends message to a chat
+    "Type": "TelegramBot",
+    "Name": "TelegramDM",
+    "BotToken": "", // Example: 1951584223:AAG5QKaQWIsJuDkcyz4zdL1noNOOKPFR0Ps
+    "ChatId": "" // Example: 740123753
+  }
+]

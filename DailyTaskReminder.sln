@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.31229.75
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DailyTaskReminder", "DailyTaskReminder\DailyTaskReminder.csproj", "{070D1706-942A-49D4-89DF-755AC4E39B9F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasks", "Tasks\Tasks.csproj", "{DB4F3A68-E9CD-4B75-B51A-DB98818B103E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tasks", "Tasks\Tasks.csproj", "{DB4F3A68-E9CD-4B75-B51A-DB98818B103E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reminders", "Reminders\Reminders.csproj", "{B6E95238-C42B-43DE-8FAF-F93013146DBF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{DB4F3A68-E9CD-4B75-B51A-DB98818B103E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB4F3A68-E9CD-4B75-B51A-DB98818B103E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB4F3A68-E9CD-4B75-B51A-DB98818B103E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6E95238-C42B-43DE-8FAF-F93013146DBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6E95238-C42B-43DE-8FAF-F93013146DBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6E95238-C42B-43DE-8FAF-F93013146DBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6E95238-C42B-43DE-8FAF-F93013146DBF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

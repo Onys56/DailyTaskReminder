@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Reminders\Reminders.csproj" />
     <ProjectReference Include="..\Tasks\Tasks.csproj" />
   </ItemGroup>
 
