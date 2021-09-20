@@ -62,7 +62,7 @@ namespace DailyTaskReminder.Reminders
         public void Send(HttpClient client, string message)
         {
             string url = $"https://api.telegram.org/bot{BotToken}/sendMessage?chat_id={ChatId}&text={HttpUtility.UrlEncode(message)}";
-            var res = client.GetAsync(url);
+            client.GetAsync(url);
         }
 
         internal static IReminder Load(Dictionary<string, string> json)

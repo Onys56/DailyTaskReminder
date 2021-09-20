@@ -11,15 +11,15 @@ namespace DailyTaskReminder
 {
     class Program 
     {
-        static System.Timers.Timer remindTimer;
-        static System.Timers.Timer deadlineTimer;
-        static List<Task> tasks = Testing.MockTasks();
+        static List<Task> tasks;
 
         static HttpClient client = new();
 
         static void Main(string[] args) 
         {
             Instances.LoadReminders("ApiKeys.json");
+            tasks = Serialization.Deserialize("tasks.txt");
+
             Server s = new Server(tasks);
             Thread serverThread = new Thread(s.Start);
             serverThread.Start();
@@ -34,7 +34,7 @@ namespace DailyTaskReminder
                 .FindAll(t => t.IsFinished == false)
                 .Select(task => (task.GetRemindTime, task))
                 .Min().task;
-            UpdateTimer(remindTimer, soonest.GetRemindTime, soonest, HandleReminder);
+            StartTimer(soonest.GetRemindTime, soonest, HandleReminder);
         }
 
         static void EnqueueSoonestDeadline()
@@ -42,15 +42,16 @@ namespace DailyTaskReminder
             Task soonest = tasks
                 .Select(task => (task.GetDeadlineTime, task))
                 .Min().task;
-            UpdateTimer(deadlineTimer, soonest.GetDeadlineTime, soonest, HandleDeadline);
+            StartTimer(soonest.GetDeadlineTime, soonest, HandleDeadline);
         }
 
-        static void UpdateTimer(System.Timers.Timer timer, DateTimeOffset time, Task task, Action<Task> handler)
+        static void StartTimer(DateTimeOffset time, Task task, Action<Task> handler)
         {
             if (task.GetRemindTime < DateTimeOffset.Now) handler(task);
             else
             {
-                timer = new() { AutoReset = false, Interval =  (time - DateTimeOffset.Now).TotalMilliseconds };
+                // System.Timers.Timer won't get garbage collected as long as it is Enabled
+                System.Timers.Timer timer = new() { AutoReset = false, Interval =  (time - DateTimeOffset.Now).TotalMilliseconds };
                 timer.Elapsed += (object source, System.Timers.ElapsedEventArgs e) => handler(task);
                 timer.Start();
             }
@@ -64,9 +65,9 @@ namespace DailyTaskReminder
                 Console.WriteLine(message);
                 t.ReminderSent = true;
                 Console.WriteLine($"{DateTimeOffset.Now} Sending reminder for {t.Name}...");
-                foreach (IReminder reminder in t.Reminders)
+                foreach (string reminderName in t.Reminders)
                 {
-                    reminder.Send(client, message);
+                    Instances.GetReminderByName[reminderName].Send(client, message);
                 }
             }
 

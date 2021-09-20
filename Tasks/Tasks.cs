@@ -1,25 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using DailyTaskReminder.Reminders;
 
 namespace DailyTaskReminder.Tasks
 {
-    public static class Testing
-    {
-        public static List<Task> MockTasks()
-        {
-            List<Task> tasks = new List<Task>();
-
-            tasks.Add(new DailyTask() { Name = "Daily16", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(12) });
-            tasks.Add(new DailyTask() { Name = "Daily18", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(21).AddMinutes(32) });
-            tasks.Add(new WeeklyTask() { Name = "WeeklyMo", IsFinished = false, RemindSpan = new TimeSpan(2, 0, 0), DueTime = DateTime.Today.AddHours(3), days = new DayOfWeek[] { DayOfWeek.Monday, DayOfWeek.Tuesday} });
-            tasks.Add(new MonthlyTask() { Name = "Monthly19", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(19).AddMinutes(52), days = new int[] { 19} });
-            tasks.Add(new MonthlyTask() { Name = "Monthly1920", IsFinished = false, RemindSpan = new TimeSpan(1, 0, 0), DueTime = DateTime.Today.AddHours(19).AddMinutes(52), days = new int[] { 19, 20 } });
-            return tasks;
-        }
-    }
-
     public static class DateTimeOffsetExtensions
     {
         public static int HowManyDaysUntilThisDayOfWeek(this DateTimeOffset d, DayOfWeek day)
@@ -59,7 +45,7 @@ namespace DailyTaskReminder.Tasks
     public abstract class Task
     {
         public string Name { get; set; }
-        public List<IReminder> Reminders { get; set; } = new List<IReminder>();
+        public List<string> Reminders { get; set; } = new List<string>();
         public bool IsFinished { get; set; }
         public bool ReminderSent { get; set; }
         public TimeSpan RemindSpan { get; set; }
@@ -69,11 +55,46 @@ namespace DailyTaskReminder.Tasks
 
         protected abstract DateTimeOffset GetDeadline(bool next = false);
 
+        internal abstract void Serialize(StreamWriter sw);
+        internal abstract Task Deserialize(StreamReader sr);
+
     }
 
     public abstract class SimpleTask : Task
     {   
         public DateTimeOffset DueTime { get; set; }
+
+        protected void BaseSerialize(StreamWriter sw)
+        {
+            sw.WriteLine(Name);
+            sw.WriteLine(DueTime);
+            sw.WriteLine(RemindSpan);
+            if (Reminders.Count == 0)
+            {
+                sw.WriteLine("-");
+            }
+            else
+            {
+                sw.WriteLine(string.Join(';', Reminders));
+            }
+        }
+
+        protected void BaseDeserialize(StreamReader sr)
+        {
+            Name = sr.ReadLine();
+            DueTime = DateTimeOffset.Parse(sr.ReadLine());
+            RemindSpan = TimeSpan.Parse(sr.ReadLine());
+            
+            string rem = sr.ReadLine();
+            if (rem == "-")
+            {
+                Reminders = new List<string>();
+            }
+            else
+            {
+                Reminders = rem.Split(';').ToList();
+            }
+        }
     }
 
     public class DailyTask : SimpleTask
@@ -90,11 +111,23 @@ namespace DailyTaskReminder.Tasks
 
             return deadline;
         }
+
+        internal override void Serialize(StreamWriter sw)
+        {
+            sw.WriteLine(GetType().Name);
+            BaseSerialize(sw);
+        }
+
+        internal override Task Deserialize(StreamReader sr)
+        {
+            BaseDeserialize(sr);
+            return this;
+        }
     }
 
     public class WeeklyTask : SimpleTask
     {
-        public DayOfWeek[] days { get; internal set; }
+        public List<DayOfWeek> Days { get; set; } = new();
 
         protected override DateTimeOffset GetDeadline(bool next = false)
         {
@@ -102,7 +135,7 @@ namespace DailyTaskReminder.Tasks
             DateTimeOffset deadline = new DateTime(now.Year, now.Month, now.Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
 
             // Order days by which one comes the soonest
-            List<DayOfWeek> ordered = days.OrderBy(day => now.HowManyDaysUntilThisDayOfWeek(day)).ToList();
+            List<DayOfWeek> ordered = Days.OrderBy(day => now.HowManyDaysUntilThisDayOfWeek(day)).ToList();
 
             int i = 0;
             if (deadline < now) i++;
@@ -115,45 +148,72 @@ namespace DailyTaskReminder.Tasks
 
             return deadline;
         }
+
+        internal override void Serialize(StreamWriter sw)
+        {
+            sw.WriteLine(GetType().Name);
+            sw.WriteLine(string.Join(';', Days));
+            BaseSerialize(sw);
+        }
+
+        internal override Task Deserialize(StreamReader sr)
+        {
+            string[] days = sr.ReadLine().Split(';');
+            Days = days.Select(d => Enum.Parse<DayOfWeek>(d)).ToList();
+            BaseDeserialize(sr);
+            return this;
+
+        }
     }
 
     public class MonthlyTask : SimpleTask
     {
-        public int[] days { get; internal set; }
+        public int Day { get; set; } = 1;
 
         protected override DateTimeOffset GetDeadline(bool next = false)
         {
             DateTimeOffset now = DateTimeOffset.Now;
             DateTimeOffset deadline = new DateTime(now.Year, now.Month, now.Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
 
-            List<int> ordered = days.OrderBy(day => now.HowManyDaysUntilThisDayOfMonth(day)).ToList();
-            deadline = deadline.AddDays(now.HowManyDaysUntilThisDayOfMonth(ordered[0]));
+            deadline = deadline.AddDays(now.HowManyDaysUntilThisDayOfMonth(Day));
 
             int i = 0;
             if (deadline < now) i++;
             if (next) i++;
             while (i > 0)
             {
-                ordered = days.OrderBy(day => deadline.HowManyDaysUntilThisDayOfMonth(day)).ToList();
-                int nextDay = ordered[1 % ordered.Count];
                 deadline = deadline.AddDays(1);
-                deadline = deadline.AddDays(deadline.HowManyDaysUntilThisDayOfMonth(nextDay));
+                deadline = deadline.AddDays(deadline.HowManyDaysUntilThisDayOfMonth(Day));
                 i--;
             }
 
             return deadline;
         }
+
+        internal override void Serialize(StreamWriter sw)
+        {
+            sw.WriteLine(GetType().Name);
+            sw.WriteLine(Day);
+            BaseSerialize(sw);
+        }
+
+        internal override Task Deserialize(StreamReader sr)
+        {
+            Day = int.Parse(sr.ReadLine());
+            BaseDeserialize(sr);
+            return this;
+        }
     }
 
     public class YearlyTask : SimpleTask
     {
-        public int month { get; internal set; }
-        public int day { get; internal set; }
+        public int Month { get; set; } = 1;
+        public int Day { get; set; } = 1;
 
         protected override DateTimeOffset GetDeadline(bool next = false)
         {
             DateTimeOffset now = DateTimeOffset.Now;
-            DateTimeOffset deadline = new DateTime(now.Year, month, day, DueTime.Hour, DueTime.Minute, DueTime.Second);
+            DateTimeOffset deadline = new DateTime(now.Year, Month, Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
 
             int i = 0;
             if (deadline < now) i++;
@@ -165,6 +225,22 @@ namespace DailyTaskReminder.Tasks
 
             return deadline;
         }
+
+        internal override void Serialize(StreamWriter sw)
+        {
+            sw.WriteLine(GetType().Name);
+            sw.WriteLine($"{Day};{Month}");
+            BaseSerialize(sw);
+        }
+
+        internal override Task Deserialize(StreamReader sr)
+        {
+            string[] date = sr.ReadLine().Split(';');
+            Day = int.Parse(date[0]);
+            Month = int.Parse(date[1]);
+            BaseDeserialize(sr);
+            return this;
+        }
     }
 
 
@@ -172,6 +248,16 @@ namespace DailyTaskReminder.Tasks
     {
         //TODO
         protected override DateTimeOffset GetDeadline(bool next = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal override void Serialize(StreamWriter sw)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal override Task Deserialize(StreamReader sr)
         {
             throw new NotImplementedException();
         }

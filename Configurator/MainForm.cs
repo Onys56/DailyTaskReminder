@@ -1,0 +1,349 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using Microsoft.VisualBasic;
+
+using DailyTaskReminder.Tasks;
+
+namespace Configurator
+{
+    public partial class MainForm : Form
+    {
+        public List<Task> Tasks;
+        private string filePath;
+
+        private Control[] menuControls;
+        private Control[] configControls;
+        private Control[] specialConfig;
+
+        private Task selectedTask;
+
+        public MainForm()
+        {
+            InitializeComponent();
+
+            menuControls = new Control[]
+            {
+                button_existing_file,
+                button_new_file
+            };
+
+            configControls = new Control[]
+            {
+                TaskList,
+                button_back_to_menu,
+                dateTimePicker1,
+                taskList_label,
+                dueTime_label,
+                taskName_label,
+                taskName_textBox,
+                dateTimePicker2,
+                remindTime_label,
+                reminders_label,
+                reminders_listBox,
+                remindersAdd_button,
+                remindersDelete_button,
+                saveToFile_button,
+                addTask_button,
+                deleteTask_Button
+            };
+
+            specialConfig = new Control[]
+            {
+                weekDays_label,
+                weekDays_checkBox,
+                monthDay_label,
+                month_label,
+                month_number,
+                day_number
+                
+            };
+
+            foreach (var c in configControls)
+            {
+                c.Hide();
+            }
+
+            foreach (var c in specialConfig)
+            {
+                c.Hide();
+            }
+        }
+
+        class TaskListItem
+        {
+            public Task task;
+            public TaskListItem(Task task)
+            {
+                this.task = task;
+            }
+
+            public override string ToString()
+            {
+                return task.Name;
+            }
+        }
+
+        private void button_existing_file_Click(object sender, EventArgs e)
+        {
+            DialogResult result = openFileDialog1.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                filePath = openFileDialog1.FileName;
+                Tasks = Serialization.Deserialize(filePath);
+                ChangeToConfig();
+            }
+        }
+
+        private void button_new_file_Click(object sender, EventArgs e)
+        {
+            DialogResult result = saveFileDialog1.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                filePath = saveFileDialog1.FileName;
+                Tasks = new();
+                ChangeToConfig();
+            }
+        }
+
+        private void ChangeToConfig()
+        {
+            foreach (var c in menuControls)
+            {
+                c.Hide();
+            }
+
+            foreach (var c in configControls)
+            {
+                c.Show();
+            }
+
+            selectedTask = null;
+            TaskList.Items.Clear();
+
+            foreach (Task task in Tasks)
+            {
+                TaskList.Items.Add(new TaskListItem(task));
+            }
+        }
+
+        private void ChangeToMenu()
+        {
+            foreach (var c in configControls)
+            {
+                c.Hide();
+            }
+
+            foreach (var c in specialConfig)
+            {
+                c.Hide();
+            }
+
+            foreach (var c in menuControls)
+            {
+                c.Show();
+            }
+        }
+
+        private void TaskList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (TaskList.SelectedItem is null) return;
+            selectedTask = ((TaskListItem)TaskList.SelectedItem).task;
+            RefreshTaskDisplay();
+        }
+
+        private void RefreshTaskDisplay()
+        {
+            taskName_textBox.Text = selectedTask.Name;
+
+            DateTime oldD = dateTimePicker1.Value;
+            DateTimeOffset newD = ((SimpleTask)selectedTask).DueTime;
+            dateTimePicker1.Value = new DateTime(oldD.Year, oldD.Month, oldD.Day, newD.Hour, newD.Minute, newD.Second);
+
+            oldD = dateTimePicker2.Value;
+            TimeSpan newT = selectedTask.RemindSpan;
+            dateTimePicker2.Value = new DateTime(oldD.Year, oldD.Month, oldD.Day, newT.Hours, newT.Minutes, newT.Seconds);
+
+            reminders_listBox.Items.Clear();
+            foreach (string reminder in selectedTask.Reminders)
+            {
+                reminders_listBox.Items.Add(reminder);
+            }
+
+            foreach (var c in specialConfig)
+            {
+                c.Hide();
+            }
+
+            switch (selectedTask.GetType().Name)
+            {
+                case "WeeklyTask":
+                    weekDays_label.Show();
+                    weekDays_checkBox.Show();
+
+                    ignoreCheck = true;
+                    foreach (int i in weekDays_checkBox.CheckedIndices)
+                    {
+                        weekDays_checkBox.SetItemChecked(i, false);
+                    }
+                    foreach (DayOfWeek day in ((WeeklyTask)selectedTask).Days)
+                    {
+                        weekDays_checkBox.SetItemChecked((6 + (int)day) % 7, true);
+                    }
+                    ignoreCheck = false;
+                    break;
+                case "MonthlyTask":
+                    monthDay_label.Show();
+                    day_number.Show();
+
+                    day_number.Value = ((MonthlyTask)selectedTask).Day;
+                    break;
+                case "YearlyTask":
+                    monthDay_label.Show();
+                    month_label.Show();
+                    day_number.Show();
+                    month_number.Show();
+
+                    day_number.Value = ((YearlyTask)selectedTask).Day;
+                    month_number.Value = ((YearlyTask)selectedTask).Month;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void button_back_to_menu_Click(object sender, EventArgs e)
+        {
+            var confirmResult = MessageBox.Show("Are you sure you want to go back? Any unsaved changes will be lost.", "Confirm", MessageBoxButtons.YesNo);
+            if (confirmResult == DialogResult.Yes) ChangeToMenu();
+        }
+
+        private void remindersAdd_button_Click(object sender, EventArgs e)
+        {
+            if (TaskList.SelectedItem == null) return;
+            string name = Interaction.InputBox("Name of the reminder:", "Add reminder");
+            if (string.IsNullOrWhiteSpace(name)) return;
+
+            selectedTask.Reminders.Add(name);
+            RefreshTaskDisplay();
+        }
+
+        private void remindersDelete_button_Click(object sender, EventArgs e)
+        {
+            string selected = (string)reminders_listBox.SelectedItem;
+            if (selected is null) return;
+
+            selectedTask.Reminders.Remove(selected);
+            RefreshTaskDisplay();
+        }
+
+        private void ShowError(string message)
+        {
+            MessageBox.Show(message, "Error");
+        }
+
+        private void day_number_ValueChanged(object sender, EventArgs e)
+        {
+            if(selectedTask.GetType().Name == "MonthlyTask")
+            {
+                ((MonthlyTask)selectedTask).Day = (int)day_number.Value;
+            }
+            else if (selectedTask.GetType().Name == "YearlyTask")
+            {
+                ((YearlyTask)selectedTask).Day = (int)day_number.Value;
+            }
+        }
+
+        private void month_number_ValueChanged(object sender, EventArgs e)
+        {
+            ((YearlyTask)selectedTask).Month = (int)month_number.Value;
+        }
+
+        private bool ignoreCheck;
+        private void weekDays_checkBox_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            if (ignoreCheck) return;
+            List<DayOfWeek> days = ((WeeklyTask)selectedTask).Days;
+            DayOfWeek day = (DayOfWeek)((1 + e.Index) % 7);
+
+            if (e.NewValue == CheckState.Checked)
+                if (!days.Contains(day)) ((WeeklyTask)selectedTask).Days.Add(day);
+            else
+                if (days.Contains(day)) days.Remove((DayOfWeek)((1 + e.Index) % 7));
+        }
+
+        private void dateTimePicker2_ValueChanged(object sender, EventArgs e)
+        {
+            if (selectedTask is null) return;
+            DateTime d = dateTimePicker2.Value;
+            selectedTask.RemindSpan = new TimeSpan(d.Hour, d.Minute, d.Second);
+        }
+
+        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        {
+            if (selectedTask is null) return;
+            ((SimpleTask)selectedTask).DueTime = dateTimePicker1.Value;
+        }
+
+        private void taskName_textBox_TextChanged(object sender, EventArgs e)
+        {
+            if (selectedTask is null) return;
+            string newName = taskName_textBox.Text;
+            if (Tasks.Count(t => t.Name == newName) >= 2)
+            {
+                ShowError($"Tasks can't have the same name: {newName}");
+                return;
+            }
+            else
+            {
+                selectedTask.Name = newName;
+            }
+        }
+
+        private void addTask_button_Click(object sender, EventArgs e)
+        {
+            Form dialog = new NewTaskDialog(this);
+            dialog.ShowDialog();
+        }
+
+        public void AddTask(Task t)
+        {
+            Tasks.Add(t);
+            TaskList.Items.Add(new TaskListItem(t));
+        }
+
+        private void taskName_textBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                dateTimePicker1.Focus();
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+
+            }
+
+        }
+
+        private void deleteTask_Button_Click(object sender, EventArgs e)
+        {
+            if (TaskList.SelectedItem is null) return;
+            var confirmResult = MessageBox.Show($"Are you sure you want to delete task: {selectedTask.Name}?", "Confirm", MessageBoxButtons.YesNo);
+            if (confirmResult == DialogResult.Yes)
+            {
+                TaskListItem t = (TaskListItem)TaskList.SelectedItem;
+                TaskList.Items.Remove(t);
+                Tasks.Remove(t.task);
+            }
+        }
+
+        private void saveToFile_button_Click(object sender, EventArgs e)
+        {
+            Serialization.Serialize(Tasks, filePath);
+            MessageBox.Show("Save successful", "Save complete");
+        }
+    }
+}
