@@ -6,8 +6,17 @@ using DailyTaskReminder.Reminders;
 
 namespace DailyTaskReminder.Tasks
 {
+    /// <summary>
+    /// Extension methods for <c cref="DateTimeOffset">Dates</c>.
+    /// </summary>
     public static class DateTimeOffsetExtensions
     {
+        /// <summary>
+        /// Calculates how many days until a certain weekday is reached.
+        /// </summary>
+        /// <param name="d">The time from which to count the days</param>
+        /// <param name="day">The day wanted</param>
+        /// <returns>Amount of days</returns>
         public static int HowManyDaysUntilThisDayOfWeek(this DateTimeOffset d, DayOfWeek day)
         {
             int diff = day - d.DayOfWeek;
@@ -15,6 +24,12 @@ namespace DailyTaskReminder.Tasks
             return diff;
         }
 
+        /// <summary>
+        /// Calculates how many days until a certain day in a month is reached.
+        /// </summary>
+        /// <param name="d">The time from which to count the days</param>
+        /// <param name="day">The day number wanted</param>
+        /// <returns>Amount of days</returns>
         public static int HowManyDaysUntilThisDayOfMonth(this DateTimeOffset d, int day)
         {
             if (day < 1 || day > 31) throw new ArgumentException("Wrong day number", nameof(day));
@@ -44,26 +59,73 @@ namespace DailyTaskReminder.Tasks
 
     public abstract class Task
     {
+        /// <summary>
+        /// Name of the task, also serves as the unique identifier of tasks.
+        /// </summary>
         public string Name { get; set; }
+        /// <summary>
+        /// List of reminder names
+        /// </summary>
+        /// <seealso cref="DailyTaskReminder.Reminders.Instances"/>
         public List<string> Reminders { get; set; } = new List<string>();
+        /// <summary>
+        /// Indicates if the task is finished or not.
+        /// </summary>
         public bool IsFinished { get; set; }
+        /// <summary>
+        /// Indicates if the reminder has already been sent for this deadline.
+        /// </summary>
         public bool ReminderSent { get; set; }
+        /// <summary>
+        /// Amount of time that determines how long before the deadline a reminder is sent.
+        /// </summary>
         public TimeSpan RemindSpan { get; set; }
+        /// <summary>
+        /// Gets the next remind time.
+        /// </summary>
         public DateTimeOffset GetRemindTime => (IsFinished || ReminderSent ? GetDeadline(true) : GetDeadline()) - RemindSpan;
-
+        /// <summary>
+        /// Get the time of the current deadline.
+        /// </summary>
         public DateTimeOffset GetDeadlineTime => GetDeadline();
 
+        /// <summary>
+        /// Gets the current or next deadline.
+        /// </summary>
+        /// <param name="next">If true returns next deadline, otherwise returns current deadline</param>
+        /// <returns>The time of deadline</returns>
         protected abstract DateTimeOffset GetDeadline(bool next = false);
 
+        /// <summary>
+        /// Serializes the task into a writable stream.
+        /// </summary>
+        /// <param name="sw">stream into which the task will be serialized</param>
         internal abstract void Serialize(StreamWriter sw);
+
+        /// <summary>
+        /// Deserializes the task from stream into Task object and returns the object.
+        /// </summary>
+        /// <param name="sr">Stream from which is read</param>
+        /// <returns>The loaded task</returns>
         internal abstract Task Deserialize(StreamReader sr);
 
     }
 
+    /// <summary>
+    /// The base class of simple tasks.
+    /// Leaving space for further extensions with more complex tasks.
+    /// </summary>
     public abstract class SimpleTask : Task
     {   
+        /// <summary>
+        /// The time of day when the deadline is.
+        /// </summary>
         public DateTimeOffset DueTime { get; set; }
 
+        /// <summary>
+        /// Task serialization of properties common to all SimpleTasks.
+        /// </summary>
+        /// <param name="sw">Stream to write to</param>
         protected void BaseSerialize(StreamWriter sw)
         {
             sw.WriteLine(Name);
@@ -79,6 +141,10 @@ namespace DailyTaskReminder.Tasks
             }
         }
 
+        /// <summary>
+        /// Task deserialization of properties common to all SimpleTasks.
+        /// </summary>
+        /// <param name="sr">Stream to read from</param>
         protected void BaseDeserialize(StreamReader sr)
         {
             Name = sr.ReadLine();
@@ -97,8 +163,16 @@ namespace DailyTaskReminder.Tasks
         }
     }
 
+    /// <summary>
+    /// A task that happens once a day at the same time.
+    /// </summary>
     public class DailyTask : SimpleTask
     {
+
+        /// <summary>
+        /// Calculates deadline.
+        /// </summary>
+        /// <see cref="Task.GetDeadline(bool)"/>
         protected override DateTimeOffset GetDeadline(bool next = false)
         {
             DateTimeOffset now = DateTimeOffset.Now;
@@ -112,12 +186,20 @@ namespace DailyTaskReminder.Tasks
             return deadline;
         }
 
+        /// <summary>
+        /// Serializes the task.
+        /// </summary>
+        /// <see cref="Task.Serialize(StreamWriter)"/>
         internal override void Serialize(StreamWriter sw)
         {
             sw.WriteLine(GetType().Name);
             BaseSerialize(sw);
         }
 
+        /// <summary>
+        /// Deserializes the task.
+        /// </summary>
+        /// <see cref="Task.Deserialize(StreamReader)"/>
         internal override Task Deserialize(StreamReader sr)
         {
             BaseDeserialize(sr);
@@ -125,10 +207,20 @@ namespace DailyTaskReminder.Tasks
         }
     }
 
+    /// <summary>
+    /// A task that happens on certain weekdays eg. Mondys and Fridays always at the same time.
+    /// </summary>
     public class WeeklyTask : SimpleTask
     {
+        /// <summary>
+        /// List of weekdays on which this task has a deadline.
+        /// </summary>
         public List<DayOfWeek> Days { get; set; } = new();
 
+        /// <summary>
+        /// Calculates deadline.
+        /// </summary>
+        /// <see cref="Task.GetDeadline(bool)"/>
         protected override DateTimeOffset GetDeadline(bool next = false)
         {
             DateTimeOffset now = DateTimeOffset.Now;
@@ -149,6 +241,10 @@ namespace DailyTaskReminder.Tasks
             return deadline;
         }
 
+        /// <summary>
+        /// Serializes the task.
+        /// </summary>
+        /// <see cref="Task.Serialize(StreamWriter)"/>
         internal override void Serialize(StreamWriter sw)
         {
             sw.WriteLine(GetType().Name);
@@ -156,6 +252,10 @@ namespace DailyTaskReminder.Tasks
             BaseSerialize(sw);
         }
 
+        /// <summary>
+        /// Deserializes the task.
+        /// </summary>
+        /// <see cref="Task.Deserialize(StreamReader)"/>
         internal override Task Deserialize(StreamReader sr)
         {
             string[] days = sr.ReadLine().Split(';');
@@ -166,10 +266,20 @@ namespace DailyTaskReminder.Tasks
         }
     }
 
+    /// <summary>
+    /// Task that has deadline every month on the n-th day, always at the same time. 
+    /// </summary>
     public class MonthlyTask : SimpleTask
     {
+        /// <summary>
+        /// The day of the month on which the task has this deadline.
+        /// </summary>
         public int Day { get; set; } = 1;
 
+        /// <summary>
+        /// Calculates deadline.
+        /// </summary>
+        /// <see cref="Task.GetDeadline(bool)"/>
         protected override DateTimeOffset GetDeadline(bool next = false)
         {
             DateTimeOffset now = DateTimeOffset.Now;
@@ -190,6 +300,10 @@ namespace DailyTaskReminder.Tasks
             return deadline;
         }
 
+        /// <summary>
+        /// Serializes the task.
+        /// </summary>
+        /// <see cref="Task.Serialize(StreamWriter)"/>
         internal override void Serialize(StreamWriter sw)
         {
             sw.WriteLine(GetType().Name);
@@ -197,6 +311,10 @@ namespace DailyTaskReminder.Tasks
             BaseSerialize(sw);
         }
 
+        /// <summary>
+        /// Deserializes the task.
+        /// </summary>
+        /// <see cref="Task.Deserialize(StreamReader)"/>
         internal override Task Deserialize(StreamReader sr)
         {
             Day = int.Parse(sr.ReadLine());
@@ -205,11 +323,24 @@ namespace DailyTaskReminder.Tasks
         }
     }
 
+    /// <summary>
+    /// Task that has deadline every year on the specified day and month.
+    /// </summary>
     public class YearlyTask : SimpleTask
     {
+        /// <summary>
+        /// The month when the task should have deadline.
+        /// </summary>
         public int Month { get; set; } = 1;
+        /// <summary>
+        /// The day of month when the task should have deadline.
+        /// </summary>
         public int Day { get; set; } = 1;
 
+        /// <summary>
+        /// Calculates deadline.
+        /// </summary>
+        /// <see cref="Task.GetDeadline(bool)"/>
         protected override DateTimeOffset GetDeadline(bool next = false)
         {
             DateTimeOffset now = DateTimeOffset.Now;
@@ -226,6 +357,10 @@ namespace DailyTaskReminder.Tasks
             return deadline;
         }
 
+        /// <summary>
+        /// Serializes the task.
+        /// </summary>
+        /// <see cref="Task.Serialize(StreamWriter)"/>
         internal override void Serialize(StreamWriter sw)
         {
             sw.WriteLine(GetType().Name);
@@ -233,6 +368,10 @@ namespace DailyTaskReminder.Tasks
             BaseSerialize(sw);
         }
 
+        /// <summary>
+        /// Deserializes the task.
+        /// </summary>
+        /// <see cref="Task.Deserialize(StreamReader)"/>
         internal override Task Deserialize(StreamReader sr)
         {
             string[] date = sr.ReadLine().Split(';');

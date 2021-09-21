@@ -5,8 +5,16 @@ using System.Collections.Generic;
 
 namespace DailyTaskReminder.Tasks
 {
+    /// <summary>
+    /// Class that provides methods for serialization and deserialization of task collections.
+    /// </summary>
     public static class Serialization
     {
+        /// <summary>
+        /// Serialize the task collection into a file.
+        /// </summary>
+        /// <param name="tasks">Collection of tasks to serialize</param>
+        /// <param name="path">Path to file to which the tasks are serialized</param>
         public static void Serialize(ICollection<Task> tasks, string path)
         {
             using StreamWriter sw = new(path);
@@ -17,6 +25,11 @@ namespace DailyTaskReminder.Tasks
             }
         }
 
+        /// <summary>
+        /// Deserializes tasks stored in a file into a list of task instances.
+        /// </summary>
+        /// <param name="path">The path to file</param>
+        /// <returns>List of tasks</returns>
         public static List<Task> Deserialize(string path)
         {
             List<Task> tasks = new();

@@ -7,9 +7,19 @@ using DailyTaskReminder.Tasks;
 
 namespace DailyTaskReminder
 {
+    /// <summary>
+    /// Wrapper class that holds the HttpListener which responds to http request from the user.
+    /// Such as getting information about tasks and setting them as finished.
+    /// </summary>
     class Server
     {
+        /// <summary>
+        /// The http listener.
+        /// </summary>
         private HttpListener listener;
+        /// <summary>
+        /// List of all tasks.
+        /// </summary>
         private List<Task> tasks;
 
         public Server(List<Task> tasks, int port = 25566)
@@ -19,6 +29,9 @@ namespace DailyTaskReminder
             listener.Prefixes.Add($"http://+:{port}/");
         }
 
+        /// <summary>
+        /// Starts the server, which waits for requests and handles them.
+        /// </summary>
         public void Start()
         {
             listener.Start();
@@ -42,6 +55,11 @@ namespace DailyTaskReminder
             }
         }
 
+        /// <summary>
+        /// Handles the GET request.
+        /// Returns information about all tasks serialized into json.
+        /// </summary>
+        /// <param name="context">Context of the request</param>
         private void HandleGet(HttpListenerContext context)
         {
             HttpListenerResponse response = context.Response;
@@ -54,6 +72,11 @@ namespace DailyTaskReminder
             response.Close();
         }
 
+        /// <summary>
+        /// Handles post requests.
+        /// The request should include a query with the name of the task that is to be set as finished.
+        /// </summary>
+        /// <param name="context">Context of the request</param>
         private void HandlePost(HttpListenerContext context)
         {
             Task t;
@@ -74,6 +97,11 @@ namespace DailyTaskReminder
             }
         }
 
+        /// <summary>
+        /// Handles bad requests.
+        /// </summary>
+        /// <param name="context">Context of the request</param>
+        /// <param name="message">Message of the error</param>
         private void BadRequest(HttpListenerContext context, string message)
         {
             HttpListenerResponse response = context.Response;
