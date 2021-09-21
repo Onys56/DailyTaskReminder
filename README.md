@@ -15,7 +15,7 @@ done.
 
 3. Then you can finally start the application! Just run this command in the DailyTaskReminder folder (see all command line options [here](#command-line-options)):
 ```console
-dotnet run -t "PathToTaskFile.txt" -r "PathToRemindersFile.json" 
+dotnet run -- -t "PathToTaskFile.txt" -r "PathToRemindersFile.json" 
 ```
 
 4. To look at the tasks and mark them as finished just open `WebClient.html` and you will see a table of the tasks. If you want to run the program on a server and access it using the WebClient just change the URL inside the `WebClient.html` from `http://localhost:25566` to the address where the server is running. For example: `http://myDomain.eu:25566`
