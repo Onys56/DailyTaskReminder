@@ -4,11 +4,12 @@ Feed The Dog
 01:00:00
 DiscordPrivate;TelegramDM
 
-DailyTask
-Take Medication
-9:00:00 +01:00
-00:05:00
--
+MonthlyTask
+20
+Pay the rent
+13:00:00
+01:00:00
+TelegramDM
 
 WeeklyTask
 Friday
