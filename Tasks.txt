@@ -1,0 +1,25 @@
+DailyTask
+Feed The Dog
+18:00:00 +01:00
+01:00:00
+DiscordPrivate;TelegramDM
+
+DailyTask
+Take Medication
+9:00:00 +01:00
+00:05:00
+-
+
+WeeklyTask
+Friday
+Water the plants
+18:00:00 +01:00
+01:00:00
+DiscordPublic
+
+YearlyTask
+7;6
+Grandma's Birthday
+10:00:00 +01:00
+23:00:00
+TelegramDM

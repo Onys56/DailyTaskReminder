@@ -30,11 +30,12 @@ namespace DailyTaskReminder.Tasks
         /// </summary>
         /// <param name="path">The path to file</param>
         /// <returns>List of tasks</returns>
-        public static List<Task> Deserialize(string path)
+        public static List<Task> Deserialize(string path, bool hush = false)
         {
             List<Task> tasks = new();
             using StreamReader sr = new(path);
             string line;
+            DateTimeOffset hour = DateTimeOffset.Now.AddHours(1);
             while ((line = sr.ReadLine()) != null)
             {
                 if (string.IsNullOrWhiteSpace(line)) continue;
@@ -46,6 +47,7 @@ namespace DailyTaskReminder.Tasks
                     "YearlyTask" or "Yearly" or "Year" or "Y" => new YearlyTask().Deserialize(sr),
                     _ => throw new Exception($"Unknown task type: {line}"),
                 };
+                if (hush && t.GetRemindTime < hour) t.ReminderSent = true;
                 tasks.Add(t);
             }
             return tasks;

@@ -15,12 +15,16 @@ namespace DailyTaskReminder
 
         static HttpClient client = new();
 
-        static void Main(string[] args) 
-        {
-            Instances.LoadReminders("ApiKeys.json");
-            tasks = Serialization.Deserialize("tasks.txt");
+        static Options options;
 
-            Server s = new Server(tasks);
+        public static void Start(Options options) 
+        {
+            Program.options = options;
+
+            Instances.LoadReminders(options.RemindersPath);
+            tasks = Serialization.Deserialize(options.TasksPath, options.Hush);
+
+            Server s = new Server(tasks, options.Port, options.Access);
             Thread serverThread = new Thread(s.Start);
             serverThread.Start();
 
@@ -32,7 +36,7 @@ namespace DailyTaskReminder
         {
             Task soonest = tasks
                 .FindAll(t => t.IsFinished == false)
-                .Select(task => (task.GetRemindTime, task))
+                .Select(task => (task.GetRemindTime, task.Name, task))
                 .Min().task;
             StartTimer(soonest.GetRemindTime, soonest, HandleReminder);
         }
@@ -40,7 +44,7 @@ namespace DailyTaskReminder
         static void EnqueueSoonestDeadline()
         {
             Task soonest = tasks
-                .Select(task => (task.GetDeadlineTime, task))
+                .Select(task => (task.GetDeadlineTime, task.Name, task))
                 .Min().task;
             StartTimer(soonest.GetDeadlineTime, soonest, HandleDeadline);
         }

@@ -129,7 +129,7 @@ namespace DailyTaskReminder.Tasks
         protected void BaseSerialize(StreamWriter sw)
         {
             sw.WriteLine(Name);
-            sw.WriteLine(DueTime);
+            sw.WriteLine(DueTime.TimeOfDay);
             sw.WriteLine(RemindSpan);
             if (Reminders.Count == 0)
             {

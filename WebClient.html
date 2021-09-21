@@ -60,7 +60,7 @@
                 button.innerText = "Finish";
                 button.addEventListener("click", () => {
                     finishedNode.innerText = "Finished";
-                    fetch(URL + "?name=" + name, { method: "POST" }).then(() => { console.log("finish of " + name + " successful"); button.style.display = "none"; });
+                    fetch(URL + "?name=" + encodeURIComponent(name), { method: "POST" }).then(() => { console.log("finish of " + name + " successful"); button.style.display = "none"; });
                 });
                 finishNode.appendChild(button);
             }

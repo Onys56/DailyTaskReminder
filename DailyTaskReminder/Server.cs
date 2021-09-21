@@ -17,15 +17,22 @@ namespace DailyTaskReminder
         /// The http listener.
         /// </summary>
         private HttpListener listener;
+
         /// <summary>
         /// List of all tasks.
         /// </summary>
         private List<Task> tasks;
 
-        public Server(List<Task> tasks, int port = 25566)
+        /// <summary>
+        /// Access-Control-Allow-Origin header.
+        /// </summary>
+        private string access;
+
+        public Server(List<Task> tasks, string port = "25566", string access = "*")
         {
             this.tasks = tasks;
             this.listener = new HttpListener();
+            this.access = access;
             listener.Prefixes.Add($"http://+:{port}/");
         }
 
@@ -64,7 +71,7 @@ namespace DailyTaskReminder
         {
             HttpListenerResponse response = context.Response;
             byte[] res = JsonSerializer.SerializeToUtf8Bytes(tasks);
-            response.Headers.Add("Access-Control-Allow-Origin", "*");
+            response.Headers.Add("Access-Control-Allow-Origin", access);
             response.ContentType = "application/json";
             response.ContentLength64 = res.Length;
             response.OutputStream.Write(res, 0, res.Length);
@@ -87,7 +94,7 @@ namespace DailyTaskReminder
                 HttpListenerResponse response = context.Response;
                 Console.WriteLine($"Setting task {t.Name} as finished...");
                 t.IsFinished = true;
-                response.Headers.Add("Access-Control-Allow-Origin", "*");
+                response.Headers.Add("Access-Control-Allow-Origin", access);
                 response.StatusCode = 200;
                 response.Close();
             }
