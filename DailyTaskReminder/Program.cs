@@ -46,7 +46,7 @@ namespace DailyTaskReminder
         {
             Task soonest = tasks
                 .FindAll(t => t.IsFinished == false)
-                .Select(task => (task.GetRemindTime, task.Name, task))
+                .Select(task => (task.GetRemindTime.AddSeconds(-5), task.Name, task))
                 .Min().task;
             StartTimer(soonest.GetRemindTime, soonest, HandleReminder);
         }
@@ -58,7 +58,7 @@ namespace DailyTaskReminder
         static void EnqueueSoonestDeadline()
         {
             Task soonest = tasks
-                .Select(task => (task.GetDeadlineTime, task.Name, task))
+                .Select(task => (task.GetDeadlineTime.AddSeconds(-5), task.Name, task))
                 .Min().task;
             StartTimer(soonest.GetDeadlineTime, soonest, HandleDeadline);
         }
