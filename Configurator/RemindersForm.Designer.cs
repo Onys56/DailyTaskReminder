@@ -128,6 +128,7 @@ namespace Configurator
             this.field_textBox.Size = new System.Drawing.Size(279, 23);
             this.field_textBox.TabIndex = 8;
             this.field_textBox.TextChanged += new System.EventHandler(this.field_textBox_TextChanged);
+            this.field_textBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.field_textBox_KeyDown);
             // 
             // label4
             // 

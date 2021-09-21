@@ -262,5 +262,20 @@ namespace Configurator
             reminder_listBox.Items.Remove(r);
             Instances.GetReminderByName.Remove(r.Name);
         }
+
+        /// <summary>
+        /// Prevents beep when pressing enter in the <c cref="field_textBox">field textBox</c>
+        /// and instead switches focus to the field listBox.
+        /// </summary>
+        private void field_textBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                fields_listBox.Focus();
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+
+            }
+        }
     }
 }
