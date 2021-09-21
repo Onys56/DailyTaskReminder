@@ -173,6 +173,7 @@ namespace DailyTaskReminder
                     default:
                         throw new ArgumentException($"Unknown argument: {args[index]}");
                 };
+                index++;
             }
             return options;
 
