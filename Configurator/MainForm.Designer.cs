@@ -56,6 +56,8 @@ namespace Configurator
             this.addTask_button = new System.Windows.Forms.Button();
             this.saveToFile_button = new System.Windows.Forms.Button();
             this.deleteTask_Button = new System.Windows.Forms.Button();
+            this.newReminder_button = new System.Windows.Forms.Button();
+            this.existingRemider_button = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.day_number)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.month_number)).BeginInit();
             this.SuspendLayout();
@@ -66,21 +68,21 @@ namespace Configurator
             // 
             // button_existing_file
             // 
-            this.button_existing_file.Location = new System.Drawing.Point(307, 157);
+            this.button_existing_file.Location = new System.Drawing.Point(296, 136);
             this.button_existing_file.Name = "button_existing_file";
-            this.button_existing_file.Size = new System.Drawing.Size(178, 35);
+            this.button_existing_file.Size = new System.Drawing.Size(199, 35);
             this.button_existing_file.TabIndex = 1;
-            this.button_existing_file.Text = "Open existing config file";
+            this.button_existing_file.Text = "Open existing task config file";
             this.button_existing_file.UseVisualStyleBackColor = true;
             this.button_existing_file.Click += new System.EventHandler(this.button_existing_file_Click);
             // 
             // button_new_file
             // 
-            this.button_new_file.Location = new System.Drawing.Point(307, 92);
+            this.button_new_file.Location = new System.Drawing.Point(296, 92);
             this.button_new_file.Name = "button_new_file";
-            this.button_new_file.Size = new System.Drawing.Size(178, 35);
+            this.button_new_file.Size = new System.Drawing.Size(199, 35);
             this.button_new_file.TabIndex = 2;
-            this.button_new_file.Text = "Create new config file";
+            this.button_new_file.Text = "Create new task config file";
             this.button_new_file.UseVisualStyleBackColor = true;
             this.button_new_file.Click += new System.EventHandler(this.button_new_file_Click);
             // 
@@ -342,11 +344,35 @@ namespace Configurator
             this.deleteTask_Button.Text = "Delete selected task";
             this.deleteTask_Button.Click += new System.EventHandler(this.deleteTask_Button_Click);
             // 
+            // newReminder_button
+            // 
+            this.newReminder_button.Location = new System.Drawing.Point(296, 284);
+            this.newReminder_button.Name = "newReminder_button";
+            this.newReminder_button.Size = new System.Drawing.Size(199, 35);
+            this.newReminder_button.TabIndex = 26;
+            this.newReminder_button.Text = "Create new reminder config file";
+            this.newReminder_button.UseVisualStyleBackColor = true;
+            this.newReminder_button.Click += new System.EventHandler(this.newReminder_button_Click);
+            // 
+            // existingRemider_button
+            // 
+            this.existingRemider_button.Location = new System.Drawing.Point(296, 325);
+            this.existingRemider_button.Name = "existingRemider_button";
+            this.existingRemider_button.Size = new System.Drawing.Size(199, 35);
+            this.existingRemider_button.TabIndex = 27;
+            this.existingRemider_button.Text = "Open existing reminder config file";
+            this.existingRemider_button.UseVisualStyleBackColor = true;
+            this.existingRemider_button.Click += new System.EventHandler(this.existingRemider_button_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.existingRemider_button);
+            this.Controls.Add(this.newReminder_button);
+            this.Controls.Add(this.button_existing_file);
+            this.Controls.Add(this.button_new_file);
             this.Controls.Add(this.deleteTask_Button);
             this.Controls.Add(this.saveToFile_button);
             this.Controls.Add(this.addTask_button);
@@ -368,8 +394,6 @@ namespace Configurator
             this.Controls.Add(this.dateTimePicker1);
             this.Controls.Add(this.button_back_to_menu);
             this.Controls.Add(this.TaskList);
-            this.Controls.Add(this.button_new_file);
-            this.Controls.Add(this.button_existing_file);
             this.Controls.Add(this.weekDays_checkBox);
             this.Controls.Add(this.weekDays_label);
             this.Name = "MainForm";
@@ -410,6 +434,8 @@ namespace Configurator
         private System.Windows.Forms.Button addTask_button;
         private System.Windows.Forms.Button saveToFile_button;
         private System.Windows.Forms.Button deleteTask_Button;
+        private System.Windows.Forms.Button newReminder_button;
+        private System.Windows.Forms.Button existingRemider_button;
     }
 }
 

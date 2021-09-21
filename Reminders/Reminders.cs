@@ -1,7 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
+using System.Runtime.Remoting;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using System.Web;
 using System.Net.Http;
 
@@ -18,11 +21,12 @@ namespace DailyTaskReminder.Reminders
         /// <summary>
         /// Dictionary of Reminders indexed by their name.
         /// </summary>
-        public static Dictionary<string, IReminder> GetReminderByName;
+        public static Dictionary<string, IReminder> GetReminderByName = new();
 
         /// <summary>
         /// Loads the reminder keys and names from a file and stores them in the dictionary
         /// where they can be retrivied by <c cref="GetReminderByName">a public property</c>.
+        /// Uses reflection.
         /// </summary>
         /// <param name="path">Path to file where the remiders are stored</param>
         public static void LoadReminders(string path)
@@ -33,15 +37,61 @@ namespace DailyTaskReminder.Reminders
             foreach(JObject entry in json)
             {
                 Dictionary<string, string> e = entry.ToObject<Dictionary<string, string>>();
-                reminders.Add(e["Name"],
-                e["Type"] switch
+
+                string name = e["Name"];
+
+                IReminder reminder = CreateReminder(e["Type"]);
+
+                e.Remove("Name");
+                e.Remove("Type");
+
+                Type type = reminder.GetType();
+
+                foreach (var field in e)
                 {
-                    "DiscordWebhook" => DiscordWebhook.Load(e),
-                    "TelegramBot" => TelegramBot.Load(e),
-                    _ => throw new Exception("Unknown type of reminder")
-                });
+                    type.GetField(field.Key).SetValue(reminder, field.Value);
+                }
+                reminders.Add(name, reminder);
             }
             GetReminderByName = reminders;
+        }
+
+        /// <summary>
+        /// Saves the reminder keys and names to a file.
+        /// </summary>
+        /// <param name="path">Path to file where the remiders should be stored</param>
+        public static void SaveReminders(string path)
+        {
+            var reminders = GetReminderByName.Select(r => 
+            { 
+                JObject o = JObject.FromObject(r.Value);
+                o.Add("Name", r.Key);
+                o.Add("Type", r.Value.GetType().Name);
+                return o;
+            });
+
+            File.WriteAllText(path, JsonConvert.SerializeObject(reminders, Formatting.Indented));
+        }
+
+        /// <summary>
+        /// Create reminder from type name.
+        /// Uses reflection.
+        /// </summary>
+        /// <param name="type">The name of type</param>
+        /// <returns>Reminder</returns>
+        public static IReminder CreateReminder(string type)
+        {
+            string assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+            string typeName = $"{typeof(IReminder).Namespace}.{type}";
+
+            ObjectHandle handle = Activator.CreateInstance(assemblyName, typeName);
+            IReminder reminder = (IReminder)handle.Unwrap();
+            foreach (var field in reminder.GetType().GetFields())
+            {
+                if (field.GetValue(reminder) is null)
+                    field.SetValue(reminder, "");
+            }
+            return reminder;
         }
     }
 
@@ -71,11 +121,6 @@ namespace DailyTaskReminder.Reminders
             string json = $"{{\"content\":\"{HttpUtility.JavaScriptStringEncode(message, true)}\"}}";
             client.PostAsync(URL, new StringContent(json, Encoding.UTF8, "application/json"));
         }
-
-        internal static IReminder Load(Dictionary<string, string> json)
-        {
-            return new DiscordWebhook() { URL = json["URL"] };
-        }
     }
 
     /// <summary>
@@ -92,11 +137,6 @@ namespace DailyTaskReminder.Reminders
         {
             string url = $"https://api.telegram.org/bot{BotToken}/sendMessage?chat_id={ChatId}&text={HttpUtility.UrlEncode(message)}";
             client.GetAsync(url);
-        }
-
-        internal static IReminder Load(Dictionary<string, string> json)
-        {
-            return new TelegramBot() { BotToken = json["BotToken"], ChatId = json["ChatId"] };
         }
     }
 }

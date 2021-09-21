@@ -15,12 +15,8 @@ namespace DailyTaskReminder
 
         static HttpClient client = new();
 
-        static Options options;
-
         public static void Start(Options options) 
         {
-            Program.options = options;
-
             Instances.LoadReminders(options.RemindersPath);
             tasks = Serialization.Deserialize(options.TasksPath, options.Hush);
 

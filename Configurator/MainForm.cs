@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using Microsoft.VisualBasic;
 
 using DailyTaskReminder.Tasks;
+using DailyTaskReminder.Reminders;
 
 namespace Configurator
 {
@@ -49,7 +50,9 @@ namespace Configurator
             menuControls = new Control[]
             {
                 button_existing_file,
-                button_new_file
+                button_new_file,
+                newReminder_button,
+                existingRemider_button
             };
 
             configControls = new Control[]
@@ -99,15 +102,15 @@ namespace Configurator
         /// </summary>
         class TaskListItem
         {
-            public Task task;
+            public Task Task;
             public TaskListItem(Task task)
             {
-                this.task = task;
+                this.Task = task;
             }
 
             public override string ToString()
             {
-                return task.Name;
+                return Task.Name;
             }
         }
 
@@ -116,6 +119,7 @@ namespace Configurator
         /// </summary>
         private void button_existing_file_Click(object sender, EventArgs e)
         {
+            openFileDialog1.FileName = "Tasks.txt";
             DialogResult result = openFileDialog1.ShowDialog();
             if (result == DialogResult.OK)
             {
@@ -130,6 +134,7 @@ namespace Configurator
         /// </summary>
         private void button_new_file_Click(object sender, EventArgs e)
         {
+            saveFileDialog1.FileName = "Tasks.txt";
             DialogResult result = saveFileDialog1.ShowDialog();
             if (result == DialogResult.OK)
             {
@@ -193,7 +198,7 @@ namespace Configurator
         private void TaskList_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (TaskList.SelectedItem is null) return;
-            selectedTask = ((TaskListItem)TaskList.SelectedItem).task;
+            selectedTask = ((TaskListItem)TaskList.SelectedItem).Task;
             RefreshTaskDisplay();
         }
 
@@ -431,7 +436,7 @@ namespace Configurator
             {
                 TaskListItem t = (TaskListItem)TaskList.SelectedItem;
                 TaskList.Items.Remove(t);
-                Tasks.Remove(t.task);
+                Tasks.Remove(t.Task);
             }
         }
 
@@ -442,6 +447,39 @@ namespace Configurator
         {
             Serialization.Serialize(Tasks, filePath);
             MessageBox.Show("Save successful", "Save complete");
+        }
+
+        /// <summary>
+        /// Lets the user specify where to save the remind coinfig file 
+        /// and opens dialog of <c cref="RemindersForm">reminder config form</c>.
+        /// </summary>
+        private void newReminder_button_Click(object sender, EventArgs e)
+        {
+            saveFileDialog1.FileName = "Remindes.json";
+            DialogResult result = saveFileDialog1.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                string reminderFile = saveFileDialog1.FileName;
+                RemindersForm form = new(reminderFile);
+                form.ShowDialog();
+            }
+        }
+
+        /// <summary>
+        /// Loads reminders from existing file 
+        /// and opens dialog of <c cref="RemindersForm">reminder config form</c>.
+        /// </summary>
+        private void existingRemider_button_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.FileName = "Remindes.json";
+            DialogResult result = openFileDialog1.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                string reminderFile = openFileDialog1.FileName;
+                Instances.LoadReminders(reminderFile);
+                RemindersForm form = new(reminderFile);
+                form.ShowDialog();
+            }
         }
     }
 }
