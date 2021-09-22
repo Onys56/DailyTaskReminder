@@ -8,7 +8,7 @@ namespace UnitTests
     /// Tests date extension methods used for calculating task reminder times and deadlines.
     /// </summary>
     [TestClass]
-    public class DateExtensions
+    public class DateExtensionsTests
     {
         [TestMethod]
         [DataRow(2021, 9, 22, DayOfWeek.Wednesday, 0)] // 2021.2.22 = Wednesday

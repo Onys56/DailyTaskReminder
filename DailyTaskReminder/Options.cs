@@ -8,7 +8,7 @@ namespace DailyTaskReminder
     /// Holds the options for program behavior.
     /// Provides method for parsing arguments from the command line.
     /// </summary>
-    class Options
+    public class Options
     {
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace DailyTaskReminder
         /// <exception cref="ArgumentException">Arguments are not valid.</exception>
         /// <param name="args">Arguments from command line</param>
         /// <returns>Parsed options</returns>
-        private static Options ParseArguments(string[] args)
+        public static Options ParseArguments(string[] args)
         {
             Options options = new Options();
 
@@ -91,19 +91,13 @@ namespace DailyTaskReminder
                         index++;
                         if (args.Length <= index)
                         {
-                            throw new ArgumentException($"Argument ${arg} needs a parameter");
+                            throw new ArgumentException($"Argument {arg} needs a parameter");
                         }
                         else
                         {
                             string param = args[index];
-                            if (File.Exists(param))
-                            {
-                                options.TasksPath = param;
-                            }
-                            else
-                            {
-                                throw new ArgumentException($"File at ${param} does not exist");
-                            }
+                            options.TasksPath = param;
+
                         }
                         break;
 
@@ -113,19 +107,12 @@ namespace DailyTaskReminder
                         index++;
                         if (args.Length <= index)
                         {
-                            throw new ArgumentException($"Argument ${arg} needs a parameter");
+                            throw new ArgumentException($"Argument {arg} needs a parameter");
                         }
                         else
                         {
                             string param = args[index];
-                            if (File.Exists(param))
-                            {
-                                options.RemindersPath = param;
-                            }
-                            else
-                            {
-                                throw new ArgumentException($"File at ${param} does not exist");
-                            }
+                            options.RemindersPath = param;
                         }
                         break;
 
@@ -134,7 +121,7 @@ namespace DailyTaskReminder
                         index++;
                         if (args.Length <= index)
                         {
-                            throw new ArgumentException($"Argument ${arg} needs a parameter");
+                            throw new ArgumentException($"Argument {arg} needs a parameter");
                         }
                         else
                         {
@@ -147,12 +134,12 @@ namespace DailyTaskReminder
                                 }
                                 else
                                 {
-                                    throw new ArithmeticException($"Argument ${arg} should be between 0 and 65535");
+                                    throw new ArithmeticException($"Argument {arg} should be between 0 and 65535");
                                 }    
                             }
                             else
                             {
-                                throw new ArgumentException($"Argument ${arg} should be a number");
+                                throw new ArgumentException($"Argument {arg} should be a number");
                             }
                         }
                         break;
@@ -162,7 +149,7 @@ namespace DailyTaskReminder
                         index++;
                         if (args.Length <= index)
                         {
-                            throw new ArgumentException($"Argument ${arg} needs a parameter");
+                            throw new ArgumentException($"Argument {arg} needs a parameter");
                         }
                         else
                         {
