@@ -7,9 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DailyTaskReminder", "DailyT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tasks", "Tasks\Tasks.csproj", "{DB4F3A68-E9CD-4B75-B51A-DB98818B103E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reminders", "Reminders\Reminders.csproj", "{B6E95238-C42B-43DE-8FAF-F93013146DBF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reminders", "Reminders\Reminders.csproj", "{B6E95238-C42B-43DE-8FAF-F93013146DBF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Configurator", "Configurator\Configurator.csproj", "{969D0393-6FA4-4EF6-8524-2A37144F4B66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Configurator", "Configurator\Configurator.csproj", "{969D0393-6FA4-4EF6-8524-2A37144F4B66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{C60EDB81-CFFB-4ADE-A227-AFC469FF7D3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{969D0393-6FA4-4EF6-8524-2A37144F4B66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{969D0393-6FA4-4EF6-8524-2A37144F4B66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{969D0393-6FA4-4EF6-8524-2A37144F4B66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C60EDB81-CFFB-4ADE-A227-AFC469FF7D3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C60EDB81-CFFB-4ADE-A227-AFC469FF7D3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C60EDB81-CFFB-4ADE-A227-AFC469FF7D3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C60EDB81-CFFB-4ADE-A227-AFC469FF7D3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

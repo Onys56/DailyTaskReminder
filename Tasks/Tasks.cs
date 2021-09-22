@@ -39,18 +39,16 @@ namespace DailyTaskReminder.Tasks
             // Skip and count days of months that have less days then we need
             int skipped = 0;
             int daysInThisMonth = DateTime.DaysInMonth(d.Year, d.Month);
-            if (day < d.Day)
-            {
-                diff += daysInThisMonth;
-                skipped++;                
-            }
             while (day > daysInThisMonth)
             {
-                daysInThisMonth = DateTime.DaysInMonth(d.Year + (d.Month - 1 + skipped) / 12, (d.Month - 1 + skipped) % 12 + 1);
                 diff += daysInThisMonth;
                 skipped++;
+                daysInThisMonth = DateTime.DaysInMonth(d.Year + (d.Month - 1 + skipped) / 12, ((d.Month - 1 + skipped) % 12) + 1);
             }
-
+            if (skipped == 0 && day < d.Day)
+            {
+                diff += daysInThisMonth;
+            }
             diff += day - d.Day;
             return diff;
         }
