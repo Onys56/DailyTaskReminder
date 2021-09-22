@@ -54,6 +54,26 @@ namespace DailyTaskReminder.Tasks
             diff += day - d.Day;
             return diff;
         }
+
+        /// <summary>
+        /// Findes the next leap year from the specified date.
+        /// </summary>
+        /// <param name="d">The yer from which to find the next leap year</param>
+        /// <returns>Next leap year</returns>
+        public static int FindNextLeapYear(this DateTimeOffset d)
+        {
+            int nextLeapYear = d.Year + 1;
+            if (nextLeapYear % 4 != 0)
+            {
+                nextLeapYear += 4 - (nextLeapYear % 4);
+            }
+            if (nextLeapYear % 100 == 0 && nextLeapYear % 400 != 0)
+            {
+                nextLeapYear += 4;
+            }
+
+            return nextLeapYear;
+        }
     }
 
     public abstract class Task
@@ -519,13 +539,29 @@ namespace DailyTaskReminder.Tasks
         {
             DateTimeOffset now = DateTimeOffset.Now;
             DateTimeOffset deadline = new DateTime(now.Year, Month, Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
+            bool isFab29 = Month == 2 && Day == 29;
+            if (isFab29)
+            {
+                deadline = new DateTime(now.FindNextLeapYear(), Month, Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
+            }
 
             int i = 0;
             if (deadline < now) i++;
             if (next) i++;
             if (i > 0)
             {
-                deadline = deadline.AddYears(i);
+                if (isFab29)
+                {
+                    while (i > 0)
+                    {
+                        deadline = new DateTime(deadline.FindNextLeapYear(), Month, Day, DueTime.Hour, DueTime.Minute, DueTime.Second);
+                        i--;
+                    }
+                }
+                else
+                {
+                    deadline = deadline.AddYears(i);
+                }
             }
 
             return deadline;
