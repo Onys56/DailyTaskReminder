@@ -69,14 +69,25 @@ namespace DailyTaskReminder
         /// <param name="context">Context of the request</param>
         private void HandleGet(HttpListenerContext context)
         {
-            HttpListenerResponse response = context.Response;
-            byte[] res = JsonSerializer.SerializeToUtf8Bytes(tasks);
-            response.Headers.Add("Access-Control-Allow-Origin", access);
-            response.ContentType = "application/json";
-            response.ContentLength64 = res.Length;
-            response.OutputStream.Write(res, 0, res.Length);
-            response.StatusCode = 200;
-            response.Close();
+            int queryCount = context.Request.QueryString.Count;
+            if (queryCount == 0)
+            {
+                SerializeObjectAndSend(context, t);
+            }
+            else if (queryCount == 1)
+            {
+                Task t;
+                if (context.Request.QueryString.Keys[0] == "name" &&
+                (t = tasks.Find(t => t.Name == context.Request.QueryString["name"])) != null)
+                {
+                    SerializeObjectAndSend(context, t);
+                }
+            }
+            else
+            {
+                BadRequest(context, "Too many queries");
+            }
+
         }
 
         /// <summary>
@@ -113,6 +124,24 @@ namespace DailyTaskReminder
         {
             HttpListenerResponse response = context.Response;
             response.StatusCode = 400;
+            response.Close();
+            Console.WriteLine($"Got bad request: {message}");
+        }
+
+        /// <summary>
+        /// Serializes object into json and sends it as response.
+        /// </summary>
+        /// <param name="context">The context from which to send the response</param>
+        /// <param name="payload">The object to send</param>
+        private void SerializeObjectAndSend(HttpListenerContext context, object payload)
+        {
+            HttpListenerResponse response = context.Response;
+            response.Headers.Add("Access-Control-Allow-Origin", access);
+            byte[] res = JsonSerializer.SerializeToUtf8Bytes(payload);
+            response.ContentType = "application/json";
+            response.ContentLength64 = res.Length;
+            response.OutputStream.Write(res, 0, res.Length);
+            response.StatusCode = 200;
             response.Close();
         }
     }

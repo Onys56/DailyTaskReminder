@@ -19,7 +19,10 @@ Contains definition for the Option class and a very simple parser. Parses the co
 ### Program
 Schedules reminders and task resetting after deadline. That is done using two timers that find the next soonest reminder or deadline and then wait until the time comes, then they send reminders or reset the task and again look for the soonest reminder or deadline.
 ### Server
-HTTP (RESTful) server that currently can handle two types of requests. GET request - returns tasks and all information about them. POST request with query `name` specifying the name of the task - marks the task as finished.
+HTTP (RESTful) server that currently can handle three types of requests. 
+1. GET request without query - returns tasks and all information about them. 
+2. GET request with query `name` - returns information about the task with that name.
+3. POST request with query `name` specifying the name of the task - marks the task as finished.
 ## 4. Configurator
 WinForms application for configuring the tasks and reminders. Mostly just on change events that update the user interface and the internal data structures with the tasks or reminders.
 
