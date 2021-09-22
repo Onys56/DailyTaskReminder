@@ -72,7 +72,7 @@ namespace DailyTaskReminder
             int queryCount = context.Request.QueryString.Count;
             if (queryCount == 0)
             {
-                SerializeObjectAndSend(context, t);
+                SerializeObjectAndSend(context, tasks);
             }
             else if (queryCount == 1)
             {
