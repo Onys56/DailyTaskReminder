@@ -1,11 +1,13 @@
 # Architecture
 Nearly all methods are documented by comments in the source files so it would be needles to repeat it here. Instead you can read about the overall structure of the program and if needed look for more details in the source code.
 
-The program is currently divided into 4 projects:
+The program is currently divided into 4 projects (not counting unit tests):
 ## 1. Tasks
 Contains definition for all task types. The abstract Task class serves as a interface for other parts of the program. Each task provides information about its status (if it is finished and if the reminder has been sent) and about the next remind time as well as the next deadline time. Each task is also able to serialize itself into file and deserialize back.
 ### Task serializer
 Provides function for serializing and deserializing list of tasks.
+### Task validator
+Is able to validate tasks, checks if all tasks have unique names and calls the Validate function of each task. Error handling is done through `TaskNotValidException` that has the error message specified so it can be displayed to the the user. 
 ## 2. Reminders
 Provides static class that is able to serialize and deserialize reminders into a static dictionary from which they can be retrieved by name. Reflection is used in both cases to make adding additional reminders as smooth as possible. Holds definition for the `IReminder` interface that all reminders must implement.
 ### Adding reminders 
