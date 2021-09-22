@@ -30,8 +30,10 @@ namespace DailyTaskReminder
             
             try
             {
-                tasks = Serialization.Deserialize(options.TasksPath, options.Hush);
                 Instances.LoadReminders(options.RemindersPath);
+
+                tasks = Serialization.Deserialize(options.TasksPath, options.Hush);
+                Validation.ValidateTasks(tasks, true);
 
                 Server s = new Server(tasks, options.Port, options.Access);
                 Thread serverThread = new Thread(s.Start);

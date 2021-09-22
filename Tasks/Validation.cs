@@ -23,7 +23,7 @@ namespace DailyTaskReminder.Tasks
         /// <param name="tasks">List of tasks</param>
         /// <exception cref="TasksNotValidException">If any of the tasks is not valid</exception>
 
-        public static void ValidateTasks(List<Task> tasks)
+        public static void ValidateTasks(List<Task> tasks, bool testThatReminderNamesExist = false)
         {
             AllNamesAreUnique(tasks);
 
@@ -31,6 +31,8 @@ namespace DailyTaskReminder.Tasks
             {
                 task.Validate();
             }
+
+            if (testThatReminderNamesExist) RemindersExist(tasks);
         }
 
         /// <summary>
@@ -57,6 +59,24 @@ namespace DailyTaskReminder.Tasks
             }
         }
 
-
+        /// <summary>
+        /// Tests that reminders with specified names in the tasks all exist.
+        /// If any reminder does not exist exception is thrown.
+        /// </summary>
+        /// <param name="tasks">List of tasks</param>
+        /// <exception cref="TasksNotValidException">If any reminder name does not exist</exception>
+        private static void RemindersExist(List<Task> tasks)
+        {
+            foreach (Task task in tasks)
+            {
+                foreach (string name in task.Reminders)
+                {
+                    if (!Reminders.Instances.GetReminderByName.ContainsKey(name))
+                    {
+                        throw new TasksNotValidException($"Task {task.Name} specifies a reminder that is not written in reminders config file: {name}");
+                    }
+                }
+            }
+        }
     }
 }
