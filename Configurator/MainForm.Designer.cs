@@ -58,8 +58,11 @@ namespace Configurator
             this.deleteTask_Button = new System.Windows.Forms.Button();
             this.newReminder_button = new System.Windows.Forms.Button();
             this.existingRemider_button = new System.Windows.Forms.Button();
+            this.reminderDays_label = new System.Windows.Forms.Label();
+            this.reminderDays_number = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.day_number)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.month_number)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.reminderDays_number)).BeginInit();
             this.SuspendLayout();
             // 
             // openFileDialog1
@@ -364,11 +367,36 @@ namespace Configurator
             this.existingRemider_button.UseVisualStyleBackColor = true;
             this.existingRemider_button.Click += new System.EventHandler(this.existingRemider_button_Click);
             // 
+            // reminderDays_label
+            // 
+            this.reminderDays_label.AutoSize = true;
+            this.reminderDays_label.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.reminderDays_label.Location = new System.Drawing.Point(354, 171);
+            this.reminderDays_label.Name = "reminderDays_label";
+            this.reminderDays_label.Size = new System.Drawing.Size(153, 20);
+            this.reminderDays_label.TabIndex = 28;
+            this.reminderDays_label.Text = "Days before remidner";
+            // 
+            // reminderDays_number
+            // 
+            this.reminderDays_number.Location = new System.Drawing.Point(514, 171);
+            this.reminderDays_number.Maximum = new decimal(new int[] {
+            364,
+            0,
+            0,
+            0});
+            this.reminderDays_number.Name = "reminderDays_number";
+            this.reminderDays_number.Size = new System.Drawing.Size(54, 23);
+            this.reminderDays_number.TabIndex = 29;
+            this.reminderDays_number.ValueChanged += new System.EventHandler(this.reminderDays_number_ValueChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.reminderDays_number);
+            this.Controls.Add(this.reminderDays_label);
             this.Controls.Add(this.existingRemider_button);
             this.Controls.Add(this.newReminder_button);
             this.Controls.Add(this.button_existing_file);
@@ -400,6 +428,7 @@ namespace Configurator
             this.Text = "Daily Task Reminder configurator";
             ((System.ComponentModel.ISupportInitialize)(this.day_number)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.month_number)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.reminderDays_number)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -436,6 +465,8 @@ namespace Configurator
         private System.Windows.Forms.Button deleteTask_Button;
         private System.Windows.Forms.Button newReminder_button;
         private System.Windows.Forms.Button existingRemider_button;
+        private System.Windows.Forms.Label reminderDays_label;
+        private System.Windows.Forms.NumericUpDown reminderDays_number;
     }
 }
 

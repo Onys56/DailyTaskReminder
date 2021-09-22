@@ -104,7 +104,28 @@ namespace DailyTaskReminder.Tasks
         /// Amount of time that determines how long before the deadline a reminder is sent.
         /// Always has value bigger or equal to 1 minute
         /// </summary>
-        public abstract TimeSpan RemindSpan { get; set; }
+        public TimeSpan RemindSpan
+        {
+            get => remindSpan;
+            set
+            {
+                TimeSpan minute = new TimeSpan(0, 1, 0);
+                TimeSpan maxRemindTime = GetMaxRemindSpan();
+
+                if (value <= minute)
+                {
+                    remindSpan = minute;
+                }
+                else if (value >= maxRemindTime)
+                {
+                    remindSpan = maxRemindTime;
+                }
+                else
+                {
+                    remindSpan = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Backing field for RemindSpan
@@ -127,6 +148,12 @@ namespace DailyTaskReminder.Tasks
         /// <param name="next">If true returns next deadline, otherwise returns current deadline</param>
         /// <returns>The time of deadline</returns>
         protected abstract DateTimeOffset GetDeadline(bool next = false);
+
+        /// <summary>
+        /// Gets the maximal remind time for this task.
+        /// </summary>
+        /// <returns>Maximal remind time</returns>
+        public abstract TimeSpan GetMaxRemindSpan();
 
         /// <summary>
         /// Serializes the task into a writable stream.
@@ -208,29 +235,12 @@ namespace DailyTaskReminder.Tasks
     public class DailyTask : SimpleTask
     {
         /// <summary>
-        /// Remind span should be between 1 minute and 23 hours 59 minutes
+        /// Maximal remind time for daily task is 23 hours and 59 minutes
         /// </summary>
-        public override TimeSpan RemindSpan 
+        /// <returns>Maximal remind time for this task</returns>
+        public override TimeSpan GetMaxRemindSpan()
         {
-            get => remindSpan;
-            set
-            {
-                TimeSpan minute = new TimeSpan(0, 1, 0);
-                TimeSpan dayWithoutMinute = new TimeSpan(23, 59, 0);
-
-                if (value <= minute)
-                {
-                    remindSpan = minute;
-                }
-                else if (value >= dayWithoutMinute)
-                {
-                    remindSpan = dayWithoutMinute;
-                }
-                else
-                {
-                    remindSpan = value;
-                }
-            }
+            return new TimeSpan(23, 59, 0);
         }
 
 
@@ -288,40 +298,23 @@ namespace DailyTaskReminder.Tasks
         public List<DayOfWeek> Days { get; set; } = new();
 
         /// <summary>
-        /// Remind span should be between 1 minute and minimal deadline interval - 1 minute
+        /// Maximal remind time for weekly task is minimal deadline interval - 1 minute
         /// </summary>
-        public override TimeSpan RemindSpan
+        /// <returns>Maximal remind time for this task</returns>
+        public override TimeSpan GetMaxRemindSpan()
         {
-            get => remindSpan;
-            set
+            int minDayDifference = 7;
+            foreach (DayOfWeek day1 in Days)
             {
-                int minDayDifference = 0;
-                foreach (DayOfWeek day1 in Days)
+                foreach (DayOfWeek day2 in Days)
                 {
-                    foreach (DayOfWeek day2 in Days)
-                    {
-                        if (day1 == day2) continue;
-                        int diff = Math.Abs((int)day1 - (int)day2);
-                        if (diff < minDayDifference) minDayDifference = diff;
-                    }
-                }
-                if (minDayDifference == 0) minDayDifference = 7;
-
-                TimeSpan minute = new TimeSpan(0, 1, 0);
-                TimeSpan maxValue = new TimeSpan(minDayDifference * 24 - 1, 59, 0);
-                if (value <= minute)
-                {
-                    remindSpan = minute;
-                }
-                else if (value >= maxValue)
-                {
-                    remindSpan = maxValue;
-                }
-                else
-                {
-                    remindSpan = value;
+                    int diff = Math.Abs((int)day1 - (int)day2);
+                    if (diff == 0) continue;
+                    if (diff < minDayDifference) minDayDifference = diff;
                 }
             }
+
+            return new TimeSpan(minDayDifference * 24 - 1, 59, 0);
         }
 
         /// <summary>
@@ -407,30 +400,14 @@ namespace DailyTaskReminder.Tasks
         /// </summary>
         public int Day { get; set; } = 1;
 
-        /// <summary>
-        /// Remind span should be between 1 minute and 27 days 23 hours 59 minutes
-        /// </summary>
-        public override TimeSpan RemindSpan
-        {
-            get => remindSpan;
-            set
-            {
-                TimeSpan minute = new TimeSpan(0, 1, 0);
-                TimeSpan maxValue = new TimeSpan(27*7 + 23, 59, 0);
 
-                if (value <= minute)
-                {
-                    remindSpan = minute;
-                }
-                else if (value >= maxValue)
-                {
-                    remindSpan = maxValue;
-                }
-                else
-                {
-                    remindSpan = value;
-                }
-            }
+        /// <summary>
+        /// Maximal remind time for monthly task is 27 days 23 hours and 59 minutes
+        /// </summary>
+        /// <returns>Maximal remind time for this task</returns>
+        public override TimeSpan GetMaxRemindSpan()
+        {
+            return new TimeSpan(27, 23, 59, 0);
         }
 
         /// <summary>
@@ -506,29 +483,12 @@ namespace DailyTaskReminder.Tasks
         public int Day { get; set; } = 1;
 
         /// <summary>
-        /// Remind span should be between 1 minute and 364 days 23 hours 59 minutes
+        /// Maximal remind time for yearly task is 364 days 23 hours and 59 minutes
         /// </summary>
-        public override TimeSpan RemindSpan
+        /// <returns>Maximal remind time for this task</returns>
+        public override TimeSpan GetMaxRemindSpan()
         {
-            get => remindSpan;
-            set
-            {
-                TimeSpan minute = new TimeSpan(0, 1, 0);
-                TimeSpan maxValue = new TimeSpan(364 * 7 + 23, 59, 0);
-
-                if (value <= minute)
-                {
-                    remindSpan = minute;
-                }
-                else if (value >= maxValue)
-                {
-                    remindSpan = maxValue;
-                }
-                else
-                {
-                    remindSpan = value;
-                }
-            }
+            return new TimeSpan(364, 23, 59, 0);
         }
 
         /// <summary>

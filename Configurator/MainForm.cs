@@ -82,7 +82,9 @@ namespace Configurator
                 monthDay_label,
                 month_label,
                 month_number,
-                day_number
+                day_number,
+                reminderDays_label,
+                reminderDays_number
                 
             };
 
@@ -213,9 +215,12 @@ namespace Configurator
             DateTimeOffset newD = ((SimpleTask)selectedTask).DueTime;
             dateTimePicker1.Value = new DateTime(oldD.Year, oldD.Month, oldD.Day, newD.Hour, newD.Minute, newD.Second);
 
+            ignoreReminderTime = true;
             oldD = dateTimePicker2.Value;
             TimeSpan newT = selectedTask.RemindSpan;
             dateTimePicker2.Value = new DateTime(oldD.Year, oldD.Month, oldD.Day, newT.Hours, newT.Minutes, newT.Seconds);
+            reminderDays_number.Value = newT.Days;
+            ignoreReminderTime = false;
 
             reminders_listBox.Items.Clear();
             foreach (string reminder in selectedTask.Reminders)
@@ -233,6 +238,8 @@ namespace Configurator
                 case "WeeklyTask":
                     weekDays_label.Show();
                     weekDays_checkBox.Show();
+                    reminderDays_label.Show();
+                    reminderDays_number.Show();
 
                     ignoreCheck = true;
                     foreach (int i in weekDays_checkBox.CheckedIndices)
@@ -244,21 +251,29 @@ namespace Configurator
                         weekDays_checkBox.SetItemChecked((6 + (int)day) % 7, true);
                     }
                     ignoreCheck = false;
+
+                    reminderDays_number.Value = selectedTask.RemindSpan.Days;
                     break;
                 case "MonthlyTask":
                     monthDay_label.Show();
                     day_number.Show();
+                    reminderDays_label.Show();
+                    reminderDays_number.Show();
 
                     day_number.Value = ((MonthlyTask)selectedTask).Day;
+                    reminderDays_number.Value = selectedTask.RemindSpan.Days;
                     break;
                 case "YearlyTask":
                     monthDay_label.Show();
                     month_label.Show();
                     day_number.Show();
                     month_number.Show();
+                    reminderDays_label.Show();
+                    reminderDays_number.Show();
 
                     day_number.Value = ((YearlyTask)selectedTask).Day;
                     month_number.Value = ((YearlyTask)selectedTask).Month;
+                    reminderDays_number.Value = selectedTask.RemindSpan.Days;
                     break;
                 default:
                     break;
@@ -345,9 +360,14 @@ namespace Configurator
             DayOfWeek day = (DayOfWeek)((1 + e.Index) % 7);
 
             if (e.NewValue == CheckState.Checked)
+            {
                 if (!days.Contains(day)) ((WeeklyTask)selectedTask).Days.Add(day);
+                UpdateReminderTime();
+            }
             else
+            {
                 if (days.Contains(day)) days.Remove((DayOfWeek)((1 + e.Index) % 7));
+            }
         }
 
         /// <summary>
@@ -355,9 +375,9 @@ namespace Configurator
         /// </summary>
         private void dateTimePicker2_ValueChanged(object sender, EventArgs e)
         {
+            if (ignoreReminderTime) return;
             if (selectedTask is null) return;
-            DateTime d = dateTimePicker2.Value;
-            selectedTask.RemindSpan = new TimeSpan(d.Hour, d.Minute, d.Second);
+            UpdateReminderTime();
         }
 
         /// <summary>
@@ -488,6 +508,54 @@ namespace Configurator
                 Instances.LoadReminders(reminderFile);
                 RemindersForm form = new(reminderFile);
                 form.ShowDialog();
+            }
+        }
+
+        /// <summary>
+        /// React to value change in the reminder days number box.
+        /// </summary>
+        private void reminderDays_number_ValueChanged(object sender, EventArgs e)
+        {
+            if (ignoreReminderTime) return;
+            if (selectedTask is null) return;
+            UpdateReminderTime();
+        }
+
+        /// <summary>
+        /// If set to true, the reminder time controls dont react on value changed event.
+        /// </summary>
+        private bool ignoreReminderTime = false;
+
+        /// <summary>
+        /// Updates the reminder time for the selected task, if the time is too long it also
+        /// adjusts the controls values.
+        /// </summary>
+        private void UpdateReminderTime()
+        {
+            DateTime d = dateTimePicker2.Value;
+            int days = (int)reminderDays_number.Value;
+            TimeSpan newTime = new TimeSpan(days, d.Hour, d.Minute, d.Second);
+            TimeSpan maxTime = selectedTask.GetMaxRemindSpan();
+            TimeSpan minTime = new TimeSpan(0, 1, 0);
+            if (newTime > maxTime)
+            {
+                ignoreReminderTime = true;
+                dateTimePicker2.Value = new DateTime(d.Year, d.Month, d.Day, maxTime.Hours, maxTime.Minutes, maxTime.Seconds);
+                reminderDays_number.Value = maxTime.Days;
+                ignoreReminderTime = false;
+                selectedTask.RemindSpan = maxTime;
+            }
+            else if (newTime < minTime)
+            {
+                ignoreReminderTime = true;
+                dateTimePicker2.Value = new DateTime(d.Year, d.Month, d.Day, minTime.Hours, minTime.Minutes, minTime.Seconds);
+                reminderDays_number.Value = minTime.Days;
+                ignoreReminderTime = false;
+                selectedTask.RemindSpan = minTime;
+            }
+            else
+            {
+                selectedTask.RemindSpan = newTime;
             }
         }
     }
