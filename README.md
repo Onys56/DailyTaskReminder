@@ -134,3 +134,4 @@ All currently supported command line options for the program.
 |          -p, --port         |      25566     |                      Port of HTTP server                      |
 |         -a --access         |        *       |     Value of the HTTP "Access-Control-Allow-Origin" header    |
 |          -h --hush          |                | For the next hour the application will not send and reminders |
+|         -v --verbose        |                |       Will print about what is happening in the program       |

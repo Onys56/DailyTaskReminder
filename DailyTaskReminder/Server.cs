@@ -42,7 +42,7 @@ namespace DailyTaskReminder
         public void Start()
         {
             listener.Start();
-            Console.WriteLine("Listening...");
+           if (Program.Options.Verbose) Console.WriteLine("Listening...");
             while (true)
             {
                 HttpListenerContext context = listener.GetContext();
@@ -103,7 +103,7 @@ namespace DailyTaskReminder
                 (t = tasks.Find(t => t.Name == context.Request.QueryString["name"])) != null)
             {
                 HttpListenerResponse response = context.Response;
-                Console.WriteLine($"Setting task {t.Name} as finished...");
+                if (Program.Options.Verbose) Console.WriteLine($"Setting task {t.Name} as finished...");
                 t.IsFinished = true;
                 response.Headers.Add("Access-Control-Allow-Origin", access);
                 response.StatusCode = 200;
@@ -125,7 +125,7 @@ namespace DailyTaskReminder
             HttpListenerResponse response = context.Response;
             response.StatusCode = 400;
             response.Close();
-            Console.WriteLine($"Got bad request: {message}");
+            if (Program.Options.Verbose) Console.WriteLine($"Got bad request: {message}");
         }
 
         /// <summary>

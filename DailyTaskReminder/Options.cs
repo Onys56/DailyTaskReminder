@@ -44,6 +44,12 @@ namespace DailyTaskReminder
         public bool Hush { get; private set; } = false;
 
         /// <summary>
+        /// If true the program will write to console.
+        /// Default: false
+        /// </summary>
+        public bool Verbose { get; private set; } = false;
+
+        /// <summary>
         /// Entry point for the program.
         /// </summary>
         /// <param name="args">Raw arguments from the command line</param>
@@ -168,6 +174,11 @@ namespace DailyTaskReminder
                     case "hush":
                     case "h":
                         options.Hush = true;
+                        break;
+
+                    case "verbose":
+                    case "v":
+                        options.Verbose = true;
                         break;
 
                     default:

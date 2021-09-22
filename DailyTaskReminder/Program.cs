@@ -22,12 +22,18 @@ namespace DailyTaskReminder
         static HttpClient client = new();
 
         /// <summary>
+        /// Options that change the program behavior.
+        /// <see cref="Options"/>
+        /// </summary>
+        static public Options Options;
+
+        /// <summary>
         /// Start the program.
         /// </summary>
         /// <param name="options">Options altering the program behavior</param>
         public static void Start(Options options) 
         {
-            
+            Options = options;
             try
             {
                 Instances.LoadReminders(options.RemindersPath);
@@ -102,7 +108,7 @@ namespace DailyTaskReminder
             {
                 string message = $"Task {t.Name} should be finished in {t.GetDeadlineTime}";
                 t.ReminderSent = true;
-                Console.WriteLine($"{DateTimeOffset.Now} Sending reminder(s) for {t.Name}...");
+                if (Program.Options.Verbose) Console.WriteLine($"{DateTimeOffset.Now} Sending reminder(s) for {t.Name}...");
                 foreach (string reminderName in t.Reminders)
                 {
                     if (Instances.GetReminderByName.TryGetValue(reminderName, out IReminder reminder))
