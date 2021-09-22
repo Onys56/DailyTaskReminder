@@ -118,7 +118,7 @@ namespace DailyTaskReminder.Reminders
         public string URL;
         public void Send(HttpClient client, string message)
         {
-            string json = $"{{\"content\":\"{HttpUtility.JavaScriptStringEncode(message, true)}\"}}";
+            string json = $"{{\"content\":\"{HttpUtility.JavaScriptStringEncode(message)}\"}}";
             client.PostAsync(URL, new StringContent(json, Encoding.UTF8, "application/json"));
         }
     }

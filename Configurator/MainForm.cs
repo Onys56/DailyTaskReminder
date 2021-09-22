@@ -41,7 +41,7 @@ namespace Configurator
         /// <summary>
         /// The task that is currently selected in the <c cref="TaskList">list of tasks</c>
         /// </summary>
-        private Task selectedTask;
+        public Task selectedTask;
 
         public MainForm()
         {
@@ -207,7 +207,7 @@ namespace Configurator
         /// <summary>
         /// Fills in the properties of selected task to the UI controls where the user can see and change them.
         /// </summary>
-        private void RefreshTaskDisplay()
+        public void RefreshTaskDisplay()
         {
             taskName_textBox.Text = selectedTask.Name;
 
@@ -295,11 +295,8 @@ namespace Configurator
         private void remindersAdd_button_Click(object sender, EventArgs e)
         {
             if (TaskList.SelectedItem == null) return;
-            string name = Interaction.InputBox("Name of the reminder:\n(Use the same name that is defined in the reminders config file)", "Add reminder");
-            if (string.IsNullOrWhiteSpace(name)) return;
-
-            selectedTask.Reminders.Add(name);
-            RefreshTaskDisplay();
+            Form dialog = new AddReminderDialog(this);
+            dialog.ShowDialog();
         }
 
         /// <summary>

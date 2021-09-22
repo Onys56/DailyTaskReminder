@@ -21,8 +21,8 @@ namespace DailyTaskReminder.Tasks
         /// Checks if all names are unique and validates each task.
         /// </summary>
         /// <param name="tasks">List of tasks</param>
+        /// <param name="testThatReminderNamesExist">Also test that the reminder names in the task specificaton exist</param>
         /// <exception cref="TasksNotValidException">If any of the tasks is not valid</exception>
-
         public static void ValidateTasks(List<Task> tasks, bool testThatReminderNamesExist = false)
         {
             AllNamesAreUnique(tasks);
