@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using DailyTaskReminder.Reminders;
 
 namespace DailyTaskReminder.Tasks
 {
@@ -59,31 +58,44 @@ namespace DailyTaskReminder.Tasks
 
     public abstract class Task
     {
+
         /// <summary>
         /// Name of the task, also serves as the unique identifier of tasks.
         /// </summary>
         public string Name { get; set; }
+
         /// <summary>
         /// List of reminder names
         /// </summary>
         /// <seealso cref="DailyTaskReminder.Reminders.Instances"/>
         public List<string> Reminders { get; set; } = new List<string>();
+
         /// <summary>
         /// Indicates if the task is finished or not.
         /// </summary>
         public bool IsFinished { get; set; }
+
         /// <summary>
         /// Indicates if the reminder has already been sent for this deadline.
         /// </summary>
         public bool ReminderSent { get; set; }
+
         /// <summary>
         /// Amount of time that determines how long before the deadline a reminder is sent.
+        /// Always has value bigger or equal to 1 minute
         /// </summary>
-        public TimeSpan RemindSpan { get; set; }
+        public abstract TimeSpan RemindSpan { get; set; }
+
+        /// <summary>
+        /// Backing field for RemindSpan
+        /// </summary>
+        protected TimeSpan remindSpan = new TimeSpan(0,1,0);
+
         /// <summary>
         /// Gets the next remind time.
         /// </summary>
         public DateTimeOffset GetRemindTime => (IsFinished || ReminderSent ? GetDeadline(true) : GetDeadline()) - RemindSpan;
+
         /// <summary>
         /// Get the time of the current deadline.
         /// </summary>
@@ -108,6 +120,13 @@ namespace DailyTaskReminder.Tasks
         /// <param name="sr">Stream from which is read</param>
         /// <returns>The loaded task</returns>
         internal abstract Task Deserialize(StreamReader sr);
+
+        /// <summary>
+        /// Checks if the task is valid.
+        /// If not throws exception.
+        /// </summary>
+        /// <exception cref="TasksNotValidException">If the task is not valid</exception>
+        internal abstract void Validate();
 
     }
 
@@ -168,6 +187,32 @@ namespace DailyTaskReminder.Tasks
     /// </summary>
     public class DailyTask : SimpleTask
     {
+        /// <summary>
+        /// Remind span should be between 1 minute and 23 hours 59 minutes
+        /// </summary>
+        public override TimeSpan RemindSpan 
+        {
+            get => remindSpan;
+            set
+            {
+                TimeSpan minute = new TimeSpan(0, 1, 0);
+                TimeSpan dayWithoutMinute = new TimeSpan(23, 59, 0);
+
+                if (value <= minute)
+                {
+                    remindSpan = minute;
+                }
+                else if (value >= dayWithoutMinute)
+                {
+                    remindSpan = dayWithoutMinute;
+                }
+                else
+                {
+                    remindSpan = value;
+                }
+            }
+        }
+
 
         /// <summary>
         /// Calculates deadline.
@@ -205,6 +250,11 @@ namespace DailyTaskReminder.Tasks
             BaseDeserialize(sr);
             return this;
         }
+
+        /// <summary>
+        /// Daily task should need no validation.
+        /// </summary>
+        internal override void Validate() {}
     }
 
     /// <summary>
@@ -216,6 +266,43 @@ namespace DailyTaskReminder.Tasks
         /// List of weekdays on which this task has a deadline.
         /// </summary>
         public List<DayOfWeek> Days { get; set; } = new();
+
+        /// <summary>
+        /// Remind span should be between 1 minute and minimal deadline interval - 1 minute
+        /// </summary>
+        public override TimeSpan RemindSpan
+        {
+            get => remindSpan;
+            set
+            {
+                int minDayDifference = 0;
+                foreach (DayOfWeek day1 in Days)
+                {
+                    foreach (DayOfWeek day2 in Days)
+                    {
+                        if (day1 == day2) continue;
+                        int diff = Math.Abs((int)day1 - (int)day2);
+                        if (diff < minDayDifference) minDayDifference = diff;
+                    }
+                }
+                if (minDayDifference == 0) minDayDifference = 7;
+
+                TimeSpan minute = new TimeSpan(0, 1, 0);
+                TimeSpan maxValue = new TimeSpan(minDayDifference * 24 - 1, 59, 0);
+                if (value <= minute)
+                {
+                    remindSpan = minute;
+                }
+                else if (value >= maxValue)
+                {
+                    remindSpan = maxValue;
+                }
+                else
+                {
+                    remindSpan = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Calculates deadline.
@@ -264,6 +351,30 @@ namespace DailyTaskReminder.Tasks
             return this;
 
         }
+
+        /// <summary>
+        /// Checks if any weekday is selected and if no weekday repeats.
+        /// </summary>
+        internal override void Validate() 
+        {
+            if (Days.Count == 0)
+            {
+                throw new TasksNotValidException($"Weekly task {Name} has no weekdays selected");
+            }
+
+            foreach (DayOfWeek day1 in Days)
+            {
+                int count = 0;
+                foreach (DayOfWeek day2 in Days)
+                {
+                    if (day1 == day2) count++;
+                }
+                if (count >= 2)
+                {
+                    throw new TasksNotValidException($"Weekly task {Name} has weekday {day1} specified multiple times");
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -275,6 +386,32 @@ namespace DailyTaskReminder.Tasks
         /// The day of the month on which the task has this deadline.
         /// </summary>
         public int Day { get; set; } = 1;
+
+        /// <summary>
+        /// Remind span should be between 1 minute and 27 days 23 hours 59 minutes
+        /// </summary>
+        public override TimeSpan RemindSpan
+        {
+            get => remindSpan;
+            set
+            {
+                TimeSpan minute = new TimeSpan(0, 1, 0);
+                TimeSpan maxValue = new TimeSpan(27*7 + 23, 59, 0);
+
+                if (value <= minute)
+                {
+                    remindSpan = minute;
+                }
+                else if (value >= maxValue)
+                {
+                    remindSpan = maxValue;
+                }
+                else
+                {
+                    remindSpan = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Calculates deadline.
@@ -321,6 +458,17 @@ namespace DailyTaskReminder.Tasks
             BaseDeserialize(sr);
             return this;
         }
+
+        /// <summary>
+        /// Checks if Day number is valid
+        /// </summary>
+        internal override void Validate() 
+        { 
+            if (Day < 1 || Day > 31)
+            {
+                throw new TasksNotValidException($"Monthly task {Name} has invalid day: {Day}");
+            }
+        }
     }
 
     /// <summary>
@@ -336,6 +484,32 @@ namespace DailyTaskReminder.Tasks
         /// The day of month when the task should have deadline.
         /// </summary>
         public int Day { get; set; } = 1;
+
+        /// <summary>
+        /// Remind span should be between 1 minute and 364 days 23 hours 59 minutes
+        /// </summary>
+        public override TimeSpan RemindSpan
+        {
+            get => remindSpan;
+            set
+            {
+                TimeSpan minute = new TimeSpan(0, 1, 0);
+                TimeSpan maxValue = new TimeSpan(364 * 7 + 23, 59, 0);
+
+                if (value <= minute)
+                {
+                    remindSpan = minute;
+                }
+                else if (value >= maxValue)
+                {
+                    remindSpan = maxValue;
+                }
+                else
+                {
+                    remindSpan = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Calculates deadline.
@@ -379,6 +553,23 @@ namespace DailyTaskReminder.Tasks
             Month = int.Parse(date[1]);
             BaseDeserialize(sr);
             return this;
+        }
+
+        /// <summary>
+        /// Checks if the month number is valid and if day occurs in the month.
+        /// </summary>
+        internal override void Validate()
+        {
+            if (Month < 1 || Month > 12)
+            {
+                throw new TasksNotValidException($"Yearly task {Name} has invalid month: {Month}");
+            }
+
+            int anyLeapYear = 2004;
+            if (Day < 1 || Day > DateTime.DaysInMonth(anyLeapYear, Month))
+            {
+                throw new TasksNotValidException($"Yearly task {Name} has invalid date: the day {Day} does not occur in the {Month}. month");
+            }
         }
     }
 }

@@ -445,8 +445,17 @@ namespace Configurator
         /// </summary>
         private void saveToFile_button_Click(object sender, EventArgs e)
         {
-            Serialization.Serialize(Tasks, filePath);
-            MessageBox.Show("Save successful", "Save complete");
+            try
+            {
+                Validation.ValidateTasks(Tasks);
+                Serialization.Serialize(Tasks, filePath);
+                MessageBox.Show("Save successful", "Save complete");
+            }
+            catch (TasksNotValidException er)
+            {
+                ShowError("Tasks are not valid, please fix the error:\n" + er.Message);
+            }
+
         }
 
         /// <summary>

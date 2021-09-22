@@ -27,15 +27,24 @@ namespace DailyTaskReminder
         /// <param name="options">Options altering the program behavior</param>
         public static void Start(Options options) 
         {
-            Instances.LoadReminders(options.RemindersPath);
-            tasks = Serialization.Deserialize(options.TasksPath, options.Hush);
+            
+            try
+            {
+                tasks = Serialization.Deserialize(options.TasksPath, options.Hush);
+                Instances.LoadReminders(options.RemindersPath);
 
-            Server s = new Server(tasks, options.Port, options.Access);
-            Thread serverThread = new Thread(s.Start);
-            serverThread.Start();
+                Server s = new Server(tasks, options.Port, options.Access);
+                Thread serverThread = new Thread(s.Start);
+                serverThread.Start();
 
-            EnqueueSoonestReminder();
-            EnqueueSoonestDeadline();
+                EnqueueSoonestReminder();
+                EnqueueSoonestDeadline();
+            }
+            catch (TasksNotValidException e)
+            {
+                Console.WriteLine("Tasks are not valid, please fix the error:");
+                Console.WriteLine(e.Message);
+            }
         }
 
         /// <summary>
@@ -94,7 +103,14 @@ namespace DailyTaskReminder
                 Console.WriteLine($"{DateTimeOffset.Now} Sending reminder(s) for {t.Name}...");
                 foreach (string reminderName in t.Reminders)
                 {
-                    Instances.GetReminderByName[reminderName].Send(client, message);
+                    if (Instances.GetReminderByName.TryGetValue(reminderName, out IReminder reminder))
+                    {
+                        reminder.Send(client, message);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Reminder {reminderName} is not specified");
+                    }
                 }
             }
 
