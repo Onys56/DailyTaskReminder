@@ -72,7 +72,9 @@ namespace Configurator
                 remindersDelete_button,
                 saveToFile_button,
                 addTask_button,
-                deleteTask_Button
+                deleteTask_Button,
+                message_label,
+                message_textBox
             };
 
             specialConfig = new Control[]
@@ -228,6 +230,8 @@ namespace Configurator
             dateTimePicker2.Value = new DateTime(oldD.Year, oldD.Month, oldD.Day, newT.Hours, newT.Minutes, newT.Seconds);
             reminderDays_number.Value = newT.Days;
             ignoreReminderTime = false;
+
+            message_textBox.Text = selectedTask.Message;
 
             reminders_listBox.Items.Clear();
             foreach (string reminder in selectedTask.Reminders)
@@ -663,6 +667,26 @@ namespace Configurator
             task.Period = new TimeSpan((int)periodDays_number.Value, oldTime.Hours, oldTime.Minutes, oldTime.Seconds);
             UpdateReminderTime();
 
+        }
+
+        /// <summary>
+        /// Handles the change of the message
+        /// </summary>
+        private void message_textBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ignorePeriodChange) return;
+
+            string message = message_textBox.Text;
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                selectedTask.Message = "-";
+            }
+            else
+            {
+                selectedTask.Message = message;
+            }
+
+            
         }
     }
 }

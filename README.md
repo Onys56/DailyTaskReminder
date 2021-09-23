@@ -32,6 +32,7 @@ TaskName
 TaskDeadline (The time of day when the task should be finished, omitted for Periodic tasks)
 RemindTime (The amount of time before deadline when the reminders are sent)
 ReminderNames
+Message
 ```
 TaskType currently supports 4 tasks:
 * DailyTask / Daily / D
@@ -51,43 +52,50 @@ Special line for those types is as follows:
 
 TaskName has to be unique for all tasks.
 
-RemindNames names of the reminders to send (separated by ';')
+RemindNames names of the reminders to send (separated by ';') or "-" if you want no reminders for this task
+
+Message that will be sent when reminding or "-" and the default message will be used (including the name of the task and the deadline time)
 
 Concrete example:
 ```
-Daily
+DailyTask
 Feed The Dog
-18:00:00
+18:00:00 +01:00
 01:00:00
 DiscordPrivate;TelegramDM
+Don't forget to feed the dog today!
 
-Periodic
-23.9.2021 10:00:00
-2:00:00:00
-Every two days
-01:00:00
--
-
-M
+MonthlyTask
 20
 Pay the rent
 13:00:00
 01:00:00
 TelegramDM
+-
 
 WeeklyTask
-Tuesday;Friday
+Friday
 Water the plants
-18:00:00
+18:00:00 +01:00
 01:00:00
 DiscordPublic
+The plants are getting thirsty!
 
-Yearly
+YearlyTask
 7;6
 Grandma's Birthday
 10:00:00 +01:00
 23:00:00
 TelegramDM
+-
+
+Periodic
+23.9.2021 10:00:00
+2.00:00:00
+Every two days
+01:00:00
+-
+-
 ```
 
 ## Reminder configuration

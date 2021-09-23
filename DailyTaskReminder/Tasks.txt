@@ -3,6 +3,7 @@ Feed The Dog
 18:00:00 +01:00
 01:00:00
 DiscordPrivate;TelegramDM
+Don't forget to feed the dog today!
 
 MonthlyTask
 20
@@ -10,6 +11,7 @@ Pay the rent
 13:00:00
 01:00:00
 TelegramDM
+-
 
 WeeklyTask
 Friday
@@ -17,6 +19,7 @@ Water the plants
 18:00:00 +01:00
 01:00:00
 DiscordPublic
+The plants are getting thirsty!
 
 YearlyTask
 7;6
@@ -24,3 +27,12 @@ Grandma's Birthday
 10:00:00 +01:00
 23:00:00
 TelegramDM
+-
+
+Periodic
+23.9.2021 10:00:00
+2.00:00:00
+Every two days
+01:00:00
+-
+-

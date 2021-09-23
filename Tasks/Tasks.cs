@@ -86,6 +86,11 @@ namespace DailyTaskReminder.Tasks
         public string Name { get; set; }
 
         /// <summary>
+        /// Message to send when reminding about the task.
+        /// </summary>
+        public string Message { get; set; } = "-";
+
+        /// <summary>
         /// List of reminder names
         /// </summary>
         /// <seealso cref="DailyTaskReminder.Reminders.Instances"/>
@@ -226,6 +231,12 @@ namespace DailyTaskReminder.Tasks
             else
             {
                 Reminders = rem.Split(';').ToList();
+            }
+
+            string m = sr.ReadLine();
+            if (m != "-" && !string.IsNullOrWhiteSpace(m))
+            {
+                Message = m;
             }
         }
     }
@@ -675,6 +686,11 @@ namespace DailyTaskReminder.Tasks
             else
             {
                 Reminders = rem.Split(';').ToList();
+            }
+            string m = sr.ReadLine();
+            if (m != "-" && !string.IsNullOrWhiteSpace(m))
+            {
+                Message = m;
             }
             return this;
         }

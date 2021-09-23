@@ -106,9 +106,10 @@ namespace DailyTaskReminder
         {
             if (!t.IsFinished && !t.ReminderSent)
             {
-                string message = $"Task {t.Name} should be finished in {t.GetDeadlineTime}";
+                string message = t.Message;
+                if (string.IsNullOrWhiteSpace(message) || message == "-") message = $"Task {t.Name} should be finished in {t.GetDeadlineTime}";
                 t.ReminderSent = true;
-                if (Program.Options.Verbose) Console.WriteLine($"{DateTimeOffset.Now} Sending reminder(s) for {t.Name}...");
+                if (Options.Verbose) Console.WriteLine($"{DateTimeOffset.Now} Sending reminder(s) for {t.Name}...");
                 foreach (string reminderName in t.Reminders)
                 {
                     if (Instances.GetReminderByName.TryGetValue(reminderName, out IReminder reminder))

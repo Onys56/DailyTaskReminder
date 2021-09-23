@@ -68,6 +68,8 @@ namespace Configurator
             this.period_time = new System.Windows.Forms.DateTimePicker();
             this.periodDays_number = new System.Windows.Forms.NumericUpDown();
             this.periodDays_label = new System.Windows.Forms.Label();
+            this.message_label = new System.Windows.Forms.Label();
+            this.message_textBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.day_number)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.month_number)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.reminderDays_number)).BeginInit();
@@ -247,7 +249,7 @@ namespace Configurator
             // 
             this.weekDays_label.AutoSize = true;
             this.weekDays_label.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.weekDays_label.Location = new System.Drawing.Point(107, 268);
+            this.weekDays_label.Location = new System.Drawing.Point(107, 307);
             this.weekDays_label.Name = "weekDays_label";
             this.weekDays_label.Size = new System.Drawing.Size(79, 20);
             this.weekDays_label.TabIndex = 17;
@@ -265,7 +267,7 @@ namespace Configurator
             "Friday",
             "Saturday",
             "Sunday"});
-            this.weekDays_checkBox.Location = new System.Drawing.Point(267, 268);
+            this.weekDays_checkBox.Location = new System.Drawing.Point(267, 307);
             this.weekDays_checkBox.Name = "weekDays_checkBox";
             this.weekDays_checkBox.Size = new System.Drawing.Size(158, 130);
             this.weekDays_checkBox.TabIndex = 18;
@@ -275,7 +277,7 @@ namespace Configurator
             // 
             this.monthDay_label.AutoSize = true;
             this.monthDay_label.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.monthDay_label.Location = new System.Drawing.Point(107, 273);
+            this.monthDay_label.Location = new System.Drawing.Point(107, 312);
             this.monthDay_label.Name = "monthDay_label";
             this.monthDay_label.Size = new System.Drawing.Size(125, 20);
             this.monthDay_label.TabIndex = 19;
@@ -285,7 +287,7 @@ namespace Configurator
             // 
             this.month_label.AutoSize = true;
             this.month_label.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.month_label.Location = new System.Drawing.Point(107, 299);
+            this.month_label.Location = new System.Drawing.Point(107, 338);
             this.month_label.Name = "month_label";
             this.month_label.Size = new System.Drawing.Size(52, 20);
             this.month_label.TabIndex = 20;
@@ -293,7 +295,7 @@ namespace Configurator
             // 
             // day_number
             // 
-            this.day_number.Location = new System.Drawing.Point(267, 270);
+            this.day_number.Location = new System.Drawing.Point(267, 309);
             this.day_number.Maximum = new decimal(new int[] {
             31,
             0,
@@ -316,7 +318,7 @@ namespace Configurator
             // 
             // month_number
             // 
-            this.month_number.Location = new System.Drawing.Point(267, 299);
+            this.month_number.Location = new System.Drawing.Point(267, 338);
             this.month_number.Maximum = new decimal(new int[] {
             12,
             0,
@@ -442,7 +444,7 @@ namespace Configurator
             // 
             this.periodTime_label.AutoSize = true;
             this.periodTime_label.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.periodTime_label.Location = new System.Drawing.Point(107, 271);
+            this.periodTime_label.Location = new System.Drawing.Point(107, 310);
             this.periodTime_label.Name = "periodTime_label";
             this.periodTime_label.Size = new System.Drawing.Size(85, 20);
             this.periodTime_label.TabIndex = 34;
@@ -451,7 +453,7 @@ namespace Configurator
             // period_time
             // 
             this.period_time.Format = System.Windows.Forms.DateTimePickerFormat.Time;
-            this.period_time.Location = new System.Drawing.Point(266, 269);
+            this.period_time.Location = new System.Drawing.Point(266, 308);
             this.period_time.Name = "period_time";
             this.period_time.ShowUpDown = true;
             this.period_time.Size = new System.Drawing.Size(81, 23);
@@ -460,7 +462,7 @@ namespace Configurator
             // 
             // periodDays_number
             // 
-            this.periodDays_number.Location = new System.Drawing.Point(457, 268);
+            this.periodDays_number.Location = new System.Drawing.Point(457, 307);
             this.periodDays_number.Maximum = new decimal(new int[] {
             9999,
             0,
@@ -475,17 +477,37 @@ namespace Configurator
             // 
             this.periodDays_label.AutoSize = true;
             this.periodDays_label.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.periodDays_label.Location = new System.Drawing.Point(354, 268);
+            this.periodDays_label.Location = new System.Drawing.Point(354, 307);
             this.periodDays_label.Name = "periodDays_label";
             this.periodDays_label.Size = new System.Drawing.Size(85, 20);
             this.periodDays_label.TabIndex = 37;
             this.periodDays_label.Text = "Period days";
             // 
+            // message_label
+            // 
+            this.message_label.AutoSize = true;
+            this.message_label.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.message_label.Location = new System.Drawing.Point(107, 273);
+            this.message_label.Name = "message_label";
+            this.message_label.Size = new System.Drawing.Size(67, 20);
+            this.message_label.TabIndex = 38;
+            this.message_label.Text = "Message";
+            // 
+            // message_textBox
+            // 
+            this.message_textBox.Location = new System.Drawing.Point(266, 273);
+            this.message_textBox.Name = "message_textBox";
+            this.message_textBox.Size = new System.Drawing.Size(302, 23);
+            this.message_textBox.TabIndex = 39;
+            this.message_textBox.TextChanged += new System.EventHandler(this.message_textBox_TextChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(800, 460);
+            this.Controls.Add(this.message_textBox);
+            this.Controls.Add(this.message_label);
             this.Controls.Add(this.periodDays_label);
             this.Controls.Add(this.periodDays_number);
             this.Controls.Add(this.period_time);
@@ -575,6 +597,8 @@ namespace Configurator
         private System.Windows.Forms.DateTimePicker period_time;
         private System.Windows.Forms.NumericUpDown periodDays_number;
         private System.Windows.Forms.Label periodDays_label;
+        private System.Windows.Forms.Label message_label;
+        private System.Windows.Forms.TextBox message_textBox;
     }
 }
 
