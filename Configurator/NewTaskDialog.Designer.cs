@@ -42,7 +42,8 @@ namespace Configurator
             "Daily",
             "Weekly",
             "Monthly",
-            "Yearly"});
+            "Yearly",
+            "Periodic"});
             this.type_dropDown.Location = new System.Drawing.Point(12, 45);
             this.type_dropDown.Name = "type_dropDown";
             this.type_dropDown.Size = new System.Drawing.Size(257, 23);

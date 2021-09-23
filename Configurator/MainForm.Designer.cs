@@ -60,9 +60,18 @@ namespace Configurator
             this.existingRemider_button = new System.Windows.Forms.Button();
             this.reminderDays_label = new System.Windows.Forms.Label();
             this.reminderDays_number = new System.Windows.Forms.NumericUpDown();
+            this.firstDeadlineTime_label = new System.Windows.Forms.Label();
+            this.firstDeadlineDate_label = new System.Windows.Forms.Label();
+            this.firstDeadline_date = new System.Windows.Forms.DateTimePicker();
+            this.firstDeadline_time = new System.Windows.Forms.DateTimePicker();
+            this.periodTime_label = new System.Windows.Forms.Label();
+            this.period_time = new System.Windows.Forms.DateTimePicker();
+            this.periodDays_number = new System.Windows.Forms.NumericUpDown();
+            this.periodDays_label = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.day_number)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.month_number)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.reminderDays_number)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.periodDays_number)).BeginInit();
             this.SuspendLayout();
             // 
             // openFileDialog1
@@ -390,17 +399,105 @@ namespace Configurator
             this.reminderDays_number.TabIndex = 29;
             this.reminderDays_number.ValueChanged += new System.EventHandler(this.reminderDays_number_ValueChanged);
             // 
+            // firstDeadlineTime_label
+            // 
+            this.firstDeadlineTime_label.AutoSize = true;
+            this.firstDeadlineTime_label.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.firstDeadlineTime_label.Location = new System.Drawing.Point(354, 136);
+            this.firstDeadlineTime_label.Name = "firstDeadlineTime_label";
+            this.firstDeadlineTime_label.Size = new System.Drawing.Size(132, 20);
+            this.firstDeadlineTime_label.TabIndex = 30;
+            this.firstDeadlineTime_label.Text = "First deadline time";
+            // 
+            // firstDeadlineDate_label
+            // 
+            this.firstDeadlineDate_label.AutoSize = true;
+            this.firstDeadlineDate_label.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.firstDeadlineDate_label.Location = new System.Drawing.Point(107, 134);
+            this.firstDeadlineDate_label.Name = "firstDeadlineDate_label";
+            this.firstDeadlineDate_label.Size = new System.Drawing.Size(132, 20);
+            this.firstDeadlineDate_label.TabIndex = 31;
+            this.firstDeadlineDate_label.Text = "First deadline date";
+            // 
+            // firstDeadline_date
+            // 
+            this.firstDeadline_date.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.firstDeadline_date.Location = new System.Drawing.Point(267, 134);
+            this.firstDeadline_date.Name = "firstDeadline_date";
+            this.firstDeadline_date.Size = new System.Drawing.Size(81, 23);
+            this.firstDeadline_date.TabIndex = 32;
+            this.firstDeadline_date.ValueChanged += new System.EventHandler(this.firstDeadline_date_ValueChanged);
+            // 
+            // firstDeadline_time
+            // 
+            this.firstDeadline_time.Format = System.Windows.Forms.DateTimePickerFormat.Time;
+            this.firstDeadline_time.Location = new System.Drawing.Point(492, 134);
+            this.firstDeadline_time.Name = "firstDeadline_time";
+            this.firstDeadline_time.ShowUpDown = true;
+            this.firstDeadline_time.Size = new System.Drawing.Size(76, 23);
+            this.firstDeadline_time.TabIndex = 33;
+            this.firstDeadline_time.ValueChanged += new System.EventHandler(this.firstDeadline_time_ValueChanged);
+            // 
+            // periodTime_label
+            // 
+            this.periodTime_label.AutoSize = true;
+            this.periodTime_label.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.periodTime_label.Location = new System.Drawing.Point(107, 271);
+            this.periodTime_label.Name = "periodTime_label";
+            this.periodTime_label.Size = new System.Drawing.Size(85, 20);
+            this.periodTime_label.TabIndex = 34;
+            this.periodTime_label.Text = "Period time";
+            // 
+            // period_time
+            // 
+            this.period_time.Format = System.Windows.Forms.DateTimePickerFormat.Time;
+            this.period_time.Location = new System.Drawing.Point(266, 269);
+            this.period_time.Name = "period_time";
+            this.period_time.ShowUpDown = true;
+            this.period_time.Size = new System.Drawing.Size(81, 23);
+            this.period_time.TabIndex = 35;
+            this.period_time.ValueChanged += new System.EventHandler(this.period_time_ValueChanged);
+            // 
+            // periodDays_number
+            // 
+            this.periodDays_number.Location = new System.Drawing.Point(457, 268);
+            this.periodDays_number.Maximum = new decimal(new int[] {
+            9999,
+            0,
+            0,
+            0});
+            this.periodDays_number.Name = "periodDays_number";
+            this.periodDays_number.Size = new System.Drawing.Size(111, 23);
+            this.periodDays_number.TabIndex = 36;
+            this.periodDays_number.ValueChanged += new System.EventHandler(this.periodDays_number_ValueChanged);
+            // 
+            // periodDays_label
+            // 
+            this.periodDays_label.AutoSize = true;
+            this.periodDays_label.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.periodDays_label.Location = new System.Drawing.Point(354, 268);
+            this.periodDays_label.Name = "periodDays_label";
+            this.periodDays_label.Size = new System.Drawing.Size(85, 20);
+            this.periodDays_label.TabIndex = 37;
+            this.periodDays_label.Text = "Period days";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.periodDays_label);
+            this.Controls.Add(this.periodDays_number);
+            this.Controls.Add(this.period_time);
+            this.Controls.Add(this.periodTime_label);
+            this.Controls.Add(this.firstDeadline_time);
+            this.Controls.Add(this.firstDeadline_date);
+            this.Controls.Add(this.firstDeadlineDate_label);
+            this.Controls.Add(this.firstDeadlineTime_label);
             this.Controls.Add(this.reminderDays_number);
             this.Controls.Add(this.reminderDays_label);
             this.Controls.Add(this.existingRemider_button);
             this.Controls.Add(this.newReminder_button);
-            this.Controls.Add(this.button_existing_file);
-            this.Controls.Add(this.button_new_file);
             this.Controls.Add(this.deleteTask_Button);
             this.Controls.Add(this.saveToFile_button);
             this.Controls.Add(this.addTask_button);
@@ -424,11 +521,14 @@ namespace Configurator
             this.Controls.Add(this.TaskList);
             this.Controls.Add(this.weekDays_checkBox);
             this.Controls.Add(this.weekDays_label);
+            this.Controls.Add(this.button_existing_file);
+            this.Controls.Add(this.button_new_file);
             this.Name = "MainForm";
             this.Text = "Daily Task Reminder configurator";
             ((System.ComponentModel.ISupportInitialize)(this.day_number)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.month_number)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.reminderDays_number)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.periodDays_number)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -467,6 +567,14 @@ namespace Configurator
         private System.Windows.Forms.Button existingRemider_button;
         private System.Windows.Forms.Label reminderDays_label;
         private System.Windows.Forms.NumericUpDown reminderDays_number;
+        private System.Windows.Forms.Label firstDeadlineTime_label;
+        private System.Windows.Forms.Label firstDeadlineDate_label;
+        private System.Windows.Forms.DateTimePicker firstDeadline_date;
+        private System.Windows.Forms.DateTimePicker firstDeadline_time;
+        private System.Windows.Forms.Label periodTime_label;
+        private System.Windows.Forms.DateTimePicker period_time;
+        private System.Windows.Forms.NumericUpDown periodDays_number;
+        private System.Windows.Forms.Label periodDays_label;
     }
 }
 

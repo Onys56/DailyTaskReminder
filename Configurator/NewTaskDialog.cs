@@ -35,6 +35,7 @@ namespace Configurator
                 "Weekly" => new WeeklyTask(),
                 "Monthly" => new MonthlyTask(),
                 "Yearly" => new YearlyTask(),
+                "Periodic" => new PeriodicTask(),
                 _ => throw new Exception("Unknown task type")
             };
             t.Name = $"NewTask {mainForm.Tasks.Count}";

@@ -74,6 +74,9 @@ namespace DailyTaskReminder.Tasks
         }
     }
 
+    /// <summary>
+    /// Abstract class for things that all tasks have in common.
+    /// </summary>
     public abstract class Task
     {
 
@@ -565,5 +568,121 @@ namespace DailyTaskReminder.Tasks
                 throw new TasksNotValidException($"Yearly task {Name} has invalid date: the day {Day} does not occur in the {Month}. month");
             }
         }
+    }
+
+    /// <summary>
+    /// Task that has deadline periodically with a custom period.
+    /// </summary>
+    public class PeriodicTask : SimpleTask
+    {
+        /// <summary>
+        /// The time of the period.
+        /// Minimum value is one minute.
+        /// </summary>
+        public TimeSpan Period
+        {
+            get => period;
+            set
+            {
+                TimeSpan minute = new TimeSpan(0, 1, 0);
+                if (value < minute)
+                {
+                    period = minute;
+                }
+                else
+                {
+                    period = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Backing field for Period.
+        /// </summary>
+        private TimeSpan period = new TimeSpan(1, 0, 0, 0);
+
+        /// <summary>
+        /// From which point in time should the task start repeating.
+        /// </summary>
+        public DateTime FirstDeadline = DateTime.Now;
+
+        /// <summary>
+        /// Maximal remind time for periodic task is the period - a minute
+        /// </summary>
+        /// <returns>Maximal remind time for this task</returns>
+        public override TimeSpan GetMaxRemindSpan()
+        {
+            return period - new TimeSpan(0, 1, 0);
+        }
+
+        /// <summary>
+        /// Calculates deadline.
+        /// </summary>
+        /// <see cref="Task.GetDeadline(bool)"/>
+        protected override DateTimeOffset GetDeadline(bool next = false)
+        {
+            DateTime now = DateTime.Now;
+
+            if (now <= FirstDeadline)
+            {
+                return FirstDeadline;
+            }
+            else
+            {
+                double deadlinePosition = Math.Ceiling((now - FirstDeadline) / period);
+                if (next) deadlinePosition++;
+                return FirstDeadline + deadlinePosition * period;
+            }
+        }
+
+        /// <summary>
+        /// Serializes the task.
+        /// </summary>
+        /// <see cref="Task.Serialize(StreamWriter)"/>
+        internal override void Serialize(StreamWriter sw)
+        {
+            sw.WriteLine(GetType().Name);
+            sw.WriteLine(FirstDeadline);
+            sw.WriteLine(period);
+            sw.WriteLine(Name);
+            sw.WriteLine(remindSpan);
+            if (Reminders.Count == 0)
+            {
+                sw.WriteLine("-");
+            }
+            else
+            {
+                sw.WriteLine(string.Join(';', Reminders));
+            }
+        }
+
+        /// <summary>
+        /// Deserializes the task.
+        /// </summary>
+        /// <see cref="Task.Deserialize(StreamReader)"/>
+        internal override Task Deserialize(StreamReader sr)
+        {
+            FirstDeadline = DateTime.Parse(sr.ReadLine());
+            Period = TimeSpan.Parse(sr.ReadLine());
+            Name = sr.ReadLine();
+            RemindSpan = TimeSpan.Parse(sr.ReadLine());
+
+            string rem = sr.ReadLine();
+            if (rem == "-")
+            {
+                Reminders = new List<string>();
+            }
+            else
+            {
+                Reminders = rem.Split(';').ToList();
+            }
+            return this;
+        }
+
+
+        /// <summary>
+        /// No verification needed for the Periodic Task.
+        /// </summary>
+        internal override void Validate() { }
     }
 }

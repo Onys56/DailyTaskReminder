@@ -29,7 +29,7 @@ To write your own tasks configuration just follow the example. Each task has thi
 TaskType (For example Daily or Monthly...)
 Special line that is only some tasks have (For example weekdays of the weekly task or day of month for the monthly task)
 TaskName
-TaskDeadline (The time of day when the task should be finished)
+TaskDeadline (The time of day when the task should be finished, omitted for Periodic tasks)
 RemindTime (The amount of time before deadline when the reminders are sent)
 ReminderNames
 ```
@@ -38,11 +38,16 @@ TaskType currently supports 4 tasks:
 * WeeklyTask / Weekly / W
 * MonthlyTask / Monthly / M
 * YearlyTask / Yearly / Y
+* PeriodicTask / Periodic / P
 
 Special line for those types is as follows:
-* Daily - skips the line
+* Daily - Skips the line
 * Weekly - Weekdays separated by ';' (for example Monday;Friday)
-* Monthly - Day;Month in numbers (for example 25;1)
+* Monthly - Number of day
+* Yearly - Day;Month in numbers (for example 25;1)
+* Periodic - Has 2 special lines (also skips TaskDeadline)
+  1. The date and time of its first deadline
+  2. The time span of the period
 
 TaskName has to be unique for all tasks.
 
@@ -55,6 +60,13 @@ Feed The Dog
 18:00:00
 01:00:00
 DiscordPrivate;TelegramDM
+
+Periodic
+23.9.2021 10:00:00
+2:00:00:00
+Every two days
+01:00:00
+-
 
 M
 20

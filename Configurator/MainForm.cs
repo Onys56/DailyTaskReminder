@@ -84,8 +84,15 @@ namespace Configurator
                 month_number,
                 day_number,
                 reminderDays_label,
-                reminderDays_number
-                
+                reminderDays_number,
+                firstDeadlineDate_label,
+                firstDeadline_date,
+                firstDeadlineTime_label,
+                firstDeadline_time,
+                periodTime_label,
+                period_time,
+                periodDays_label,
+                periodDays_number
             };
 
             foreach (var c in configControls)
@@ -233,6 +240,9 @@ namespace Configurator
                 c.Hide();
             }
 
+            dueTime_label.Show();
+            dateTimePicker1.Show();
+
             switch (selectedTask.GetType().Name)
             {
                 case "WeeklyTask":
@@ -254,6 +264,7 @@ namespace Configurator
 
                     reminderDays_number.Value = selectedTask.RemindSpan.Days;
                     break;
+
                 case "MonthlyTask":
                     monthDay_label.Show();
                     day_number.Show();
@@ -263,6 +274,7 @@ namespace Configurator
                     day_number.Value = ((MonthlyTask)selectedTask).Day;
                     reminderDays_number.Value = selectedTask.RemindSpan.Days;
                     break;
+
                 case "YearlyTask":
                     monthDay_label.Show();
                     month_label.Show();
@@ -274,6 +286,31 @@ namespace Configurator
                     day_number.Value = ((YearlyTask)selectedTask).Day;
                     month_number.Value = ((YearlyTask)selectedTask).Month;
                     reminderDays_number.Value = selectedTask.RemindSpan.Days;
+                    break;
+
+                case "PeriodicTask":
+                    firstDeadlineDate_label.Show();
+                    firstDeadlineTime_label.Show();
+                    firstDeadline_date.Show();
+                    firstDeadline_time.Show();
+                    periodDays_label.Show();
+                    periodDays_number.Show();
+                    periodTime_label.Show();
+                    period_time.Show();
+                    reminderDays_label.Show();
+                    reminderDays_number.Show();
+
+                    PeriodicTask task = (PeriodicTask)selectedTask;
+
+                    ignorePeriodChange = true;
+                    firstDeadline_date.Value = task.FirstDeadline;
+                    firstDeadline_time.Value = task.FirstDeadline;
+
+                    DateTime old = period_time.Value;
+                    period_time.Value = new DateTime(old.Year, old.Month, old.Day, task.Period.Hours, task.Period.Minutes, task.Period.Seconds);
+                    periodDays_number.Value = task.Period.Days;
+                    ignorePeriodChange = false;
+
                     break;
                 default:
                     break;
@@ -554,6 +591,78 @@ namespace Configurator
             {
                 selectedTask.RemindSpan = newTime;
             }
+        }
+
+        /// <summary>
+        /// If true period task controls will not fire events when the value is changed
+        /// </summary>
+        private bool ignorePeriodChange = false;
+
+        /// <summary>
+        /// Handles the change in the date part of firtDeadline
+        /// </summary>
+        private void firstDeadline_date_ValueChanged(object sender, EventArgs e)
+        {
+            if (ignorePeriodChange) return;
+            if (selectedTask is null) return;
+
+            PeriodicTask task = (PeriodicTask)selectedTask;
+
+            DateTime old = task.FirstDeadline;
+            DateTime newDate = firstDeadline_date.Value;
+
+            task.FirstDeadline = new DateTime(newDate.Year, newDate.Month, newDate.Day, old.Hour, old.Minute, old.Second);
+            UpdateReminderTime();
+
+        }
+
+        /// <summary>
+        /// Handles the change in the time part of FirtDeadline
+        /// </summary>
+        private void firstDeadline_time_ValueChanged(object sender, EventArgs e)
+        {
+            if (ignorePeriodChange) return;
+            if (selectedTask is null) return;
+
+            PeriodicTask task = (PeriodicTask)selectedTask;
+
+            DateTime old = task.FirstDeadline;
+            DateTime newTime = firstDeadline_time.Value;
+
+            task.FirstDeadline = new DateTime(old.Year, old.Month, old.Day, newTime.Hour, newTime.Minute, newTime.Second);
+            UpdateReminderTime();
+        }
+
+        /// <summary>
+        /// Handles the change in the time part of Period
+        /// </summary>
+        private void period_time_ValueChanged(object sender, EventArgs e)
+        {
+            if (ignorePeriodChange) return;
+            if (selectedTask is null) return;
+
+            PeriodicTask task = (PeriodicTask)selectedTask;
+
+            DateTime newTime = period_time.Value;
+            task.Period = new TimeSpan(task.Period.Days, newTime.Hour, newTime.Minute, newTime.Second);
+            UpdateReminderTime();
+
+        }
+
+        /// <summary>
+        /// Handles the change in the time part of Period
+        /// </summary>
+        private void periodDays_number_ValueChanged(object sender, EventArgs e)
+        {
+            if (ignorePeriodChange) return;
+            if (selectedTask is null) return;
+
+            PeriodicTask task = (PeriodicTask)selectedTask;
+
+            TimeSpan oldTime = task.Period;
+            task.Period = new TimeSpan((int)periodDays_number.Value, oldTime.Hours, oldTime.Minutes, oldTime.Seconds);
+            UpdateReminderTime();
+
         }
     }
 }

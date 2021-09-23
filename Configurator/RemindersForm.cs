@@ -208,6 +208,7 @@ namespace Configurator
             }
             else if (reminder_listBox.SelectedItem != null)
             {
+                if (Instances.GetReminderByName.ContainsKey(field_textBox.Text)) return;
                 string oldName = selected.Name;
                 selected.Name = field_textBox.Text;
                 Instances.GetReminderByName.Remove(oldName);
@@ -222,6 +223,7 @@ namespace Configurator
         /// </summary>
         private void save_button_Click(object sender, EventArgs e)
         {
+
             Instances.SaveReminders(reminderFileName);
             MessageBox.Show("Save successful", "Save complete");
         }
@@ -241,6 +243,7 @@ namespace Configurator
 
             IReminder reminder = Instances.CreateReminder(r.Type.Name);
             string name = $"{r.Type.Name} {Instances.GetReminderByName.Count}";
+            while (Instances.GetReminderByName.ContainsKey(name)) name += "1";
             Instances.GetReminderByName.Add(name, reminder);
 
             reminder_listBox.Items.Add(new ReminderListItem(reminder, name));

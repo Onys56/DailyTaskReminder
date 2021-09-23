@@ -45,6 +45,7 @@ namespace DailyTaskReminder.Tasks
                     "WeeklyTask" or "Weekly" or "Week" or "W" => new WeeklyTask().Deserialize(sr),
                     "MonthlyTask" or "Monthly" or "Month" or "M" => new MonthlyTask().Deserialize(sr),
                     "YearlyTask" or "Yearly" or "Year" or "Y" => new YearlyTask().Deserialize(sr),
+                    "PeriodicTask" or "Periodic" or "Period" or "P" => new PeriodicTask().Deserialize(sr),
                     _ => throw new Exception($"Unknown task type: {line}"),
                 };
                 if (hush && t.GetRemindTime < hour) t.ReminderSent = true;

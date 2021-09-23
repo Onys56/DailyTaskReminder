@@ -48,6 +48,7 @@ namespace Configurator
 
             main.selectedTask.Reminders.Add(name);
             main.RefreshTaskDisplay();
+            Close();
         }
 
         /// <summary>
